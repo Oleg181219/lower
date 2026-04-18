@@ -2,7 +2,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5015/mydb}
+    url: ${DB_URL:jdbc:postgresql://localhost:5015/lower_db}
     username: ${USER_NAME:myuser}
     password: ${USER_PASSWORD:mypassword}
     driver-class-name: org.postgresql.Driver
