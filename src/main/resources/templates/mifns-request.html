@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Запрос в МИФНС</title>
+    <style>
+        body { font-family: "Times New Roman", serif; font-size: 12pt; margin: 2cm; line-height: 1.5; }
+        .header { text-align: center; font-weight: bold; font-size: 14pt; margin-bottom: 1cm; }
+        .section { margin-bottom: 0.5cm; }
+        .field-value { display: inline-block; max-width: 70%; word-wrap: break-word; }
+        .bold { font-weight: bold; }
+        .indent { text-indent: 1.25cm; }
+        .footer { margin-top: 2cm; text-align: right; }
+        .signature { margin-top: 2cm; }
+    </style>
+</head>
+<body>
+
+<div class="header">ЗАПРОС</div>
+
+<div class="section">
+    Решением <span class="bold" th:text="${courtDecision.courtName}">Арбитражного суда Ростовской области</span>
+    от <span th:text="${courtDecision.date}">06.06.2023</span>
+    по делу №<span th:text="${courtDecision.caseNumber}">А53-10291/2023</span>
+    в отношении гражданина
+    <span class="bold" th:text="${debtor.fullName}">Подрезова Александра Александровича</span>
+    (<span th:text="${debtor.birthDate}">07.09.1990</span> года рождения,
+    место рождения: <span th:text="${debtor.birthPlace}">Ростовская область, г. Новочеркасск</span>,
+    ИНН <span th:text="${debtor.inn}">615018201246</span>,
+    СНИЛС <span th:text="${debtor.snils}">163-409-915 71</span>,
+    адрес: <span th:text="${debtor.address}">346400, Ростовская область, г. Новочеркасск, сп. Красный, д. 6</span>)
+    введена процедура <span class="bold" th:text="${procedure}">реализации имущества</span>.
+</div>
+
+<div class="section">
+    Финансовым управляющим утвержден(а)
+    <span class="bold" th:text="${lawyer.fullName}">Степаньянц Светлана Анатольевна</span>
+    (<span th:text="${lawyer.inn}">ИНН 616511012560</span>,
+    <span th:text="${lawyer.snils}">СНИЛС 14063088738</span>) —
+    <span th:text="${lawyer.sroName}">СРО АУ "Лига"</span>
+    (<span th:text="${lawyer.sroOgrn}">ОГРН 1045803007326</span>,
+    <span th:text="${lawyer.sroInn}">ИНН 5836140708</span>,
+    <span th:text="${lawyer.sroAddress}">г. Пенза, ул. Володарского, 9</span>).
+</div>
+
+<div class="section">
+    В соответствии с абз. 7 п. 1 ст. 20.3 ФЗ «О несостоятельности (банкротстве)» арбитражному управляющему представлено право запрашивать необходимые сведения о должнике, о лицах, входящих в состав органов управления должника, о контролирующих лицах, о принадлежащем им имуществе (в том числе имущественных правах), о контрагентах и об обязательствах должника у физических лиц, юридических лиц, государственных органов, органов управления государственными внебюджетными фондами Российской Федерации и органов местного самоуправления, включая сведения, составляющие служебную, коммерческую и банковскую тайну.
+</div>
+
+<div class="section">
+    В силу абз. 10 п. 1 ст. 20.3 Закона о банкротстве физические лица, юридические лица, государственные органы, органы управления государственными внебюджетными фондами Российской Федерации и органы местного самоуправления представляют запрошенные арбитражным управляющим сведения в течение семи дней со дня получения запроса без взимания платы.
+</div>
+
+<div class="section">
+    Согласно п. 7 ст. 213.9 Закона о банкротстве финансовый управляющий вправе получать информацию об имуществе гражданина, а также о счетах и вкладах (депозитах) гражданина, в том числе по банковским картам, об остатках электронных денежных средств и о переводах электронных денежных средств от граждан и юридических лиц (включая кредитные организации), от органов государственной власти, органов местного самоуправления.
+</div>
+
+<div class="section">
+    В целях проведения анализа финансового состояния гражданина прошу Вас предоставить следующую информацию в отношении гражданина <span class="bold" th:text="${debtor.fullName}">Подрезова Александра Александровича</span>:
+</div>
+
+<div class="section">
+    - сведения о наличии/отсутствии статуса индивидуального предпринимателя;<br/>
+    - сведения о юридических лицах, учредителем(акционером) которых является <span th:text="${debtor.fullName}">Подрезов Александр Александрович</span>;<br/>
+    – сведения о наличии(отсутствии) задолженности по обязательным платежам.<br/>
+    – сведения о доходах должника за трехлетний период
+</div>
+
+<div class="section">
+    В случае отсутствия запрашиваемой информации прошу выдать соответствующую справку.
+</div>
+
+<div class="section">
+    Запрашиваемую информацию прошу направить на имя финансового управляющего
+    <span class="bold" th:text="${lawyer.fullName}">Степаньянц С.А.</span>: <span th:text="${lawyer.mailAddress}">344000, г. Ростов-на-Дону, пер. Халтуринский, 4, оф. 6</span>.
+</div>
+
+<div class="section">
+    <strong>Приложение:</strong>
+    <ol>
+        <li>Копия Решения Арбитражного суда Ростовской области от <span th:text="${courtDecision.date}">06.06.2023</span> по делу №<span th:text="${courtDecision.caseNumber}">А53-10291/2023</span></li>
+        <li>Копия паспорта должника;</li>
+        <li>Копия паспорта финансового управляющего</li>
+    </ol>
+</div>
+
+<div class="footer">
+    <div class="signature">
+        Финансовый управляющий<br/>
+        <span class="bold" th:text="${lawyer.fullName}">Степаньянц С.А.</span>
+    </div>
+    <div>
+        <span th:text="${debtor.fullName}">Подрезов А.А.</span>
+    </div>
+</div>
+
+</body>
+</html>

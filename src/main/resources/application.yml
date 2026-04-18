@@ -1,0 +1,39 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5015/mydb}
+    username: ${USER_NAME:myuser}
+    password: ${USER_PASSWORD:mypassword}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 200
+      minimum-idle: 5
+  jooq:
+    sql-dialect: POSTGRES
+  mail:
+    host: ${MAIL_HOST:smtp.yandex.ru}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:igarik10@yandex.ru}
+    password: ${MAIL_PASSWORD:pass}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  liquibase:
+    enabled: ${LIQUIBASE_ENABLED:false}
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+logging:
+  level:
+    org.jooq: WARN
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:vlxlSTZZQ2sp+TqeTuO/JaxJ8/JuBVT3L9/C+p3/5oDCIvU/lV/4E+CNj7cOl+FYXBVHjddfwF3CpiU1/zxGQA==} # ПЕРЕМЕННАЯ ОКРУЖЕНИЯ, ДЕФАУЛТ СТРОГО ЛОКАЛЬНО!!!!!
+    expiration-hours: 12
+
+  admin:
+    name: ${ADMIN:igarik10@yandex.ru}
