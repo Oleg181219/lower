@@ -48,7 +48,8 @@ public class AuthService {
         UsersRecord user = userDao.findByUsername(username);
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            log.error("Invalid auth data");
+            throw new RuntimeException("Invalid auth data");
         }
 
         return jwtTokenProvider.generateToken(user);
