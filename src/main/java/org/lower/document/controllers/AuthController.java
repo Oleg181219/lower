@@ -54,7 +54,7 @@ public class AuthController {
 
     }
 
-/**
+    /**
      * Создание сотрудника. Создается только владельцем.
      *
      * @param request
@@ -67,7 +67,7 @@ public class AuthController {
         return ResponseEntity.ok().header(AUTHORIZATION, BEARER + token).build();
     }
 
-    /*    *//**
+    /* /**
      * Создание клиента. Создается только владельцем или сотрудником.
      *
      * @param request

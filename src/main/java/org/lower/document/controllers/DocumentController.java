@@ -2,50 +2,36 @@ package org.lower.document.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lower.document.dto.FspsNotificationRequest;
-import org.lower.document.services.FspsNotificationService;
-import org.springframework.http.HttpStatus;
+import org.lower.document.dto.GeneratedFileDto;
+import org.lower.document.services.PdfGenerationService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-@Controller
-@RequestMapping("/api/fsps")
+@RestController
+@RequestMapping("/api/documents")
 @RequiredArgsConstructor
 public class DocumentController {
 
-    private FspsNotificationService notificationService;
+    private final PdfGenerationService pdfGenerationService;
 
-    @PostMapping("/generate-and-send")
-    public CompletableFuture<ResponseEntity<String>> generateAndSend(
-            @RequestBody FspsNotificationRequest request) {
+    /**
+     * Эндпоинт для генерации документов.
+     * Возвращает JSON массив с файлами (имя + base64 контент).
+     * Фронтенд сам решает, скачивать их по отдельности или упаковать в ZIP.
+     */
+    @PostMapping("/generate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    public ResponseEntity<List<GeneratedFileDto>> generateDocuments(@RequestBody PdfGenerationRequest request) {
 
-        return notificationService.processRequestAsync(request)
-                .thenApply(v -> ResponseEntity.ok("Запрос-уведомление успешно сгенерировано и отправлено."))
-                .exceptionally(ex -> {
-                    log.error("Ошибка в асинхронной обработке", ex);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Ошибка: " + ex.getMessage());
-                });
-    }
+        List<GeneratedFileDto> files = pdfGenerationService.generateDocuments(request);
 
-    // Для будущего: массовая генерация
-    @PostMapping("/batch/generate-and-send")
-    public CompletableFuture<ResponseEntity<String>> batchGenerateAndSend(
-            @RequestBody List<FspsNotificationRequest> requests) {
-
-        return notificationService.processMultipleRequestsAsync(requests)
-                .thenApply(v -> ResponseEntity.ok("Пакет из " + requests.size() + " документов обработан."))
-                .exceptionally(ex -> {
-                    log.error("Ошибка в массовой обработке", ex);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Ошибка пакетной обработки: " + ex.getMessage());
-                });
+        return ResponseEntity.ok(files);
     }
 }

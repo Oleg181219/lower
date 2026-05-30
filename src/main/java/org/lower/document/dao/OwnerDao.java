@@ -9,6 +9,8 @@ import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 import static org.lower.document.jooq.codegen.Tables.OWNERS;
 
 @Slf4j
@@ -39,5 +41,9 @@ public class OwnerDao {
                 .onConflict()
                 .doNothing()
                 .execute();
+    }
+
+    public OwnersRecord getLawyerByUuid(UUID lawyerId) {
+        return null;
     }
 }
