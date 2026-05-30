@@ -8,7 +8,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.lower.document.dto.FspsNotificationRequest;
+import org.lower.document.dto.request.FspsNotificationRequest;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;

@@ -1,7 +1,9 @@
-package org.lower.document.dto;
+package org.lower.document.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.lower.document.dto.CourtDecision;
+import org.lower.document.dto.Trustee;
 
 import java.util.List;
 
