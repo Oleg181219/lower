@@ -1,11 +1,10 @@
 package org.lower.document.dao;
 
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.lower.document.auth.JwtTokenProvider;
-import org.lower.document.dto.OwnerRequest;
+import org.lower.document.dto.request.OwnerRequest;
 import org.lower.document.jooq.codegen.enums.RoleEnum;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
 import org.lower.document.security.PasswordService;

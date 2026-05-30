@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lower.document.dao.ClientDao;
 import org.lower.document.dao.OwnerDao;
-import org.lower.document.dto.BatchGenerationRequest;
+import org.lower.document.dto.request.BatchGenerationRequest;
 import org.lower.document.dto.GeneratedFileDto;
 import org.lower.document.dto.RecipientInfoDto;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
