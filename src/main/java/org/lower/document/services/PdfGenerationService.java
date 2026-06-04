@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lower.document.dao.ClientDao;
 import org.lower.document.dao.OwnerDao;
+import org.lower.document.dto.CourtInfo;
+import org.lower.document.dto.DebtorInfo;
+import org.lower.document.dto.LawyerInfo;
 import org.lower.document.dto.request.BatchGenerationRequest;
 import org.lower.document.dto.GeneratedFileDto;
 import org.lower.document.dto.RecipientInfoDto;
@@ -138,13 +141,11 @@ public class PdfGenerationService {
     }
 
     private CourtInfo mapClientToCourtInfo(ClientsRecord client) {
-        var info = new CourtInfo();
-        // Предполагаем, что в таблице clients есть поля суда.
-        // Если нет, нужно джойнить таблицу court_cases по client_id
-        info.setCourtName(client.getCourtName());       // Примерное поле
-        info.setDecisionDate(client.getCourtDate());    // Примерное поле
-        info.setCaseNumber(client.getCaseNumber());     // Примерное поле
-        return info;
+        return new CourtInfo(
+                client.getCourtName(),
+                client.getCourtDecisionDate() != null ? client.getCourtDecisionDate().toString() : "данные отсутствуют",
+                client.getCaseNumber()
+        );
     }
 
     private LawyerInfo mapOwnerToLawyerInfo(OwnersRecord owner) {

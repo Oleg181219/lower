@@ -1,4 +1,4 @@
-package org.lower.document.dto.responce;
+package org.lower.document.dto.response;
 
 import lombok.Data;
 
