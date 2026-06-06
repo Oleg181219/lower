@@ -3,6 +3,7 @@ package org.lower.document.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lower.document.dto.GeneratedFileDto;
+import org.lower.document.dto.request.BatchGenerationRequest;
 import org.lower.document.services.PdfGenerationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +29,7 @@ public class DocumentController {
      */
     @PostMapping("/generate")
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
-    public ResponseEntity<List<GeneratedFileDto>> generateDocuments(@RequestBody PdfGenerationRequest request) {
+    public ResponseEntity<List<GeneratedFileDto>> generateDocuments(@RequestBody BatchGenerationRequest request) {
 
         List<GeneratedFileDto> files = pdfGenerationService.generateDocuments(request);
 

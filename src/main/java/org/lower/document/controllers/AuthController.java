@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lower.document.dto.request.AuthRequest;
 import org.lower.document.dto.request.OwnerRequest;
 import org.lower.document.dto.request.StaffRequest;
-import org.lower.document.dto.responce.OwnerResponse;
+import org.lower.document.dto.response.OwnerResponse;
 import org.lower.document.services.auth.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

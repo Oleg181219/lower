@@ -38,11 +38,13 @@ public class OwnerDao {
                 .set(OWNERS.SRO_OGRN, ownerRequest.getSroOgrn())
                 .set(OWNERS.USER_ID, newUser.getId())
                 .onConflict()
-                .doNothing()
+                .doNothing() // Просто игнорим?
                 .execute();
     }
 
     public OwnersRecord getLawyerByUuid(UUID lawyerId) {
-        return null;
+        return dsl.selectFrom(OWNERS)
+                .where(OWNERS.ID.eq(lawyerId))
+                .fetchOne();
     }
 }
