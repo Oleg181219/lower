@@ -6,7 +6,6 @@ import org.jooq.DSLContext;
 import org.lower.document.dto.RecipientInfoDto;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
 import org.springframework.stereotype.Service;
-import static org.lower.document.jooq.codegen.Tables.RECIPIENT_ORGS;
 
 @Slf4j
 @Service
@@ -15,7 +14,7 @@ public class RecipientLookupService {
     private final DSLContext dsl;
 
     public RecipientInfoDto getRecipient(String docType, ClientsRecord client) {
-        var record = dsl.selectFrom(RECIPIENT_ORGS)
+      /*  var record = dsl.selectFrom(RECIPIENT_ORGS)
                 .where(RECIPIENT_ORGS.DOC_TYPE.eq(docType.toLowerCase()))
                 .fetchOne();
 
@@ -28,6 +27,7 @@ public class RecipientLookupService {
                 record.getOrgName(),
                 record.getOrgAddress(),
                 record.getOrgNote()
-        );
+        );*/
+        return null;
     }
 }

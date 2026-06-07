@@ -45,22 +45,25 @@ public class SecurityConfig {
 
                 // Настраиваем авторизацию запросов
                 .authorizeHttpRequests(auth -> auth
-                        // Публичные эндпоинты (авторизация, регистрация)
-                        .requestMatchers("/api/auth/register/owner").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/register/staff").hasRole("OWNER")
-                        .requestMatchers("/api/auth/register/client").hasAnyRole( "OWNER", "WORKER")
+                                // Публичные эндпоинты (авторизация, регистрация)
+                                .requestMatchers("/api/auth/authenticate").permitAll()
+//                        .requestMatchers("/api/auth/register/owner").hasRole("ADMIN")
+//                        .requestMatchers("/api/auth/register/staff").hasRole("OWNER")
+//                        .requestMatchers("/api/auth/register/client").hasAnyRole( "OWNER", "WORKER")
+                                .requestMatchers(
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**",
+                                        "/swagger-resources/**",
+                                        "/webjars/**"
+                                ).permitAll()
+                                // Эндпоинты для администратора
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Эндпоинты для администратора
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // Эндпоинты для владельца (OWNER) и Админа
-                        .requestMatchers("/api/owner/**").hasAnyRole("ADMIN", "OWNER")
-
-                        // Эндпоинты для всех авторизованных пользователей (ADMIN, OWNER, WORKER)
-                        .requestMatchers("/api/worker/**").hasAnyRole("ADMIN", "OWNER", "WORKER")
-
-                        // Все остальные запросы требуют аутентификации (наличия валидного токена)
-                        .anyRequest().authenticated()
+                                // Эндпоинты для владельца (OWNER) и Админа
+                                .requestMatchers("/api/**").authenticated()
+                                // Все остальные запросы требуют аутентификации (наличия валидного токена)
+                                .anyRequest().authenticated()
                 )
 
                 // Настраиваем сессию как STATELESS (не создаем HttpSession)

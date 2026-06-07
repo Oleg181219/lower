@@ -13,6 +13,7 @@ import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
 import org.lower.document.jooq.codegen.tables.Documents;
 import org.lower.document.jooq.codegen.tables.Owners;
 import org.lower.document.jooq.codegen.tables.PgpArmorHeaders;
+import org.lower.document.jooq.codegen.tables.RecipientOrgs;
 import org.lower.document.jooq.codegen.tables.Staffs;
 import org.lower.document.jooq.codegen.tables.Users;
 import org.lower.document.jooq.codegen.tables.records.PgpArmorHeadersRecord;
@@ -87,6 +88,11 @@ public class Tables {
             __1
         );
     }
+
+    /**
+     * The table <code>public.recipient_orgs</code>.
+     */
+    public static final RecipientOrgs RECIPIENT_ORGS = RecipientOrgs.RECIPIENT_ORGS;
 
     /**
      * The table <code>public.staffs</code>.

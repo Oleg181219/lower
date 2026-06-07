@@ -5,15 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.lower.document.dto.request.AuthRequest;
 import org.lower.document.dto.request.OwnerRequest;
 import org.lower.document.dto.request.StaffRequest;
+import org.lower.document.dto.response.AuthResponse;
 import org.lower.document.dto.response.OwnerResponse;
 import org.lower.document.services.auth.AuthService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -23,7 +23,7 @@ import static org.lower.document.util.UtilsAndConstants.BEARER;
 ;
 
 @Slf4j
-@Controller
+@RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
@@ -38,8 +38,16 @@ public class AuthController {
      */
     @PostMapping("/authenticate")
     public ResponseEntity<?> auth(@RequestBody AuthRequest request) {
-        String token = authService.authenticate(request.getUsername(), request.getPassword());
-        return ResponseEntity.ok().header(AUTHORIZATION, BEARER + token).build();
+        try {
+            String token = authService.authenticate(request.getUsername(), request.getPassword());
+            log.info(token);
+            return ResponseEntity.ok().header(AUTHORIZATION, BEARER + token).build();
+        } catch (UsernameNotFoundException exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse());
+        } catch (Exception e ) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
     }
 
     /**

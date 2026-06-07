@@ -20,6 +20,7 @@ import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
 import org.lower.document.jooq.codegen.tables.Documents;
 import org.lower.document.jooq.codegen.tables.Owners;
 import org.lower.document.jooq.codegen.tables.PgpArmorHeaders;
+import org.lower.document.jooq.codegen.tables.RecipientOrgs;
 import org.lower.document.jooq.codegen.tables.Staffs;
 import org.lower.document.jooq.codegen.tables.Users;
 import org.lower.document.jooq.codegen.tables.records.PgpArmorHeadersRecord;
@@ -103,6 +104,11 @@ public class Public extends SchemaImpl {
     }
 
     /**
+     * The table <code>public.recipient_orgs</code>.
+     */
+    public final RecipientOrgs RECIPIENT_ORGS = RecipientOrgs.RECIPIENT_ORGS;
+
+    /**
      * The table <code>public.staffs</code>.
      */
     public final Staffs STAFFS = Staffs.STAFFS;
@@ -134,6 +140,7 @@ public class Public extends SchemaImpl {
             Documents.DOCUMENTS,
             Owners.OWNERS,
             PgpArmorHeaders.PGP_ARMOR_HEADERS,
+            RecipientOrgs.RECIPIENT_ORGS,
             Staffs.STAFFS,
             Users.USERS
         );

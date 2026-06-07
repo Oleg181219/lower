@@ -141,10 +141,10 @@ public class PdfGenerationService {
     }
 
     private CourtInfo mapClientToCourtInfo(ClientsRecord client) {
-        return new CourtInfo(
+        return new CourtInfo(/*
                 client.getCourtName(),
                 client.getCourtDecisionDate() != null ? client.getCourtDecisionDate().toString() : "данные отсутствуют",
-                client.getCaseNumber()
+                client.getCaseNumber()*/
         );
     }
 

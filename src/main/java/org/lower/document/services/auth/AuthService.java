@@ -2,6 +2,7 @@ package org.lower.document.services.auth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.lower.document.auth.JwtTokenProvider;
 import org.lower.document.config.properties.AppProperties;
 import org.lower.document.dao.OwnerDao;
@@ -16,6 +17,7 @@ import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +70,9 @@ public class AuthService {
 
     public String authenticate(String username, String password) {
         UsersRecord user = userDao.findByUsername(username);
-
+        if (ObjectUtils.isEmpty(user)) {
+            throw new UsernameNotFoundException(username);
+        }
         if (!passwordEncoder.matches(password, user.getPassword())) {
             log.error("Invalid auth data");
             throw new RuntimeException("Invalid auth data");
