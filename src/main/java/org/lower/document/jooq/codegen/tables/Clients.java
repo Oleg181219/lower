@@ -6,7 +6,9 @@ package org.lower.document.jooq.codegen.tables;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.jooq.Condition;
@@ -33,6 +35,7 @@ import org.jooq.impl.TableImpl;
 import org.lower.document.jooq.codegen.Keys;
 import org.lower.document.jooq.codegen.Public;
 import org.lower.document.jooq.codegen.tables.Documents.DocumentsPath;
+import org.lower.document.jooq.codegen.tables.Owners.OwnersPath;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
 
 
@@ -101,6 +104,31 @@ public class Clients extends TableImpl<ClientsRecord> {
      * The column <code>public.clients.updated_at</code>.
      */
     public final TableField<ClientsRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+
+    /**
+     * The column <code>public.clients.court_name</code>.
+     */
+    public final TableField<ClientsRecord, String> COURT_NAME = createField(DSL.name("court_name"), SQLDataType.VARCHAR(500), this, "");
+
+    /**
+     * The column <code>public.clients.case_number</code>.
+     */
+    public final TableField<ClientsRecord, String> CASE_NUMBER = createField(DSL.name("case_number"), SQLDataType.VARCHAR(100), this, "");
+
+    /**
+     * The column <code>public.clients.court_decision_date</code>.
+     */
+    public final TableField<ClientsRecord, LocalDate> COURT_DECISION_DATE = createField(DSL.name("court_decision_date"), SQLDataType.LOCALDATE, this, "");
+
+    /**
+     * The column <code>public.clients.procedure_type</code>.
+     */
+    public final TableField<ClientsRecord, String> PROCEDURE_TYPE = createField(DSL.name("procedure_type"), SQLDataType.VARCHAR(100), this, "");
+
+    /**
+     * The column <code>public.clients.owner_id</code>.
+     */
+    public final TableField<ClientsRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID, this, "");
 
     private Clients(Name alias, Table<ClientsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -172,6 +200,23 @@ public class Clients extends TableImpl<ClientsRecord> {
     @Override
     public UniqueKey<ClientsRecord> getPrimaryKey() {
         return Keys.CLIENTS_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<ClientsRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.CLIENTS__CLIENTS_OWNER_ID_FKEY);
+    }
+
+    private transient OwnersPath _owners;
+
+    /**
+     * Get the implicit join path to the <code>public.owners</code> table.
+     */
+    public OwnersPath owners() {
+        if (_owners == null)
+            _owners = new OwnersPath(this, Keys.CLIENTS__CLIENTS_OWNER_ID_FKEY, null);
+
+        return _owners;
     }
 
     private transient DocumentsPath _documents;

@@ -33,6 +33,7 @@ import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 import org.lower.document.jooq.codegen.Keys;
 import org.lower.document.jooq.codegen.Public;
+import org.lower.document.jooq.codegen.tables.Clients.ClientsPath;
 import org.lower.document.jooq.codegen.tables.Staffs.StaffsPath;
 import org.lower.document.jooq.codegen.tables.Users.UsersPath;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
@@ -216,6 +217,19 @@ public class Owners extends TableImpl<OwnersRecord> {
             _users = new UsersPath(this, Keys.OWNERS__OWNERS_USER_ID_FKEY, null);
 
         return _users;
+    }
+
+    private transient ClientsPath _clients;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.clients</code>
+     * table
+     */
+    public ClientsPath clients() {
+        if (_clients == null)
+            _clients = new ClientsPath(this, null, Keys.CLIENTS__CLIENTS_OWNER_ID_FKEY.getInverseKey());
+
+        return _clients;
     }
 
     private transient StaffsPath _staffs;
