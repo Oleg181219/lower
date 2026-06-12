@@ -149,3 +149,11 @@ CREATE TRIGGER update_staffs_updated_at
     FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 --rollback DROP TRIGGER IF EXISTS update_staffs_updated_at ON staffs;
+
+--changeset admin:update-clients-table-v01
+alter TABLE clients
+add column full_name_short varchar(256);
+
+--changeset admin:update-constraint-inn-clients-table-v01
+ALTER TABLE clients
+    ADD CONSTRAINT unique_clients_inn UNIQUE (inn);

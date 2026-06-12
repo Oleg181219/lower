@@ -8,6 +8,7 @@ import org.jooq.Configuration;
 import org.jooq.Field;
 import org.jooq.Result;
 import org.lower.document.jooq.codegen.tables.Clients;
+import org.lower.document.jooq.codegen.tables.CourtOrgs;
 import org.lower.document.jooq.codegen.tables.Databasechangelog;
 import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
 import org.lower.document.jooq.codegen.tables.Documents;
@@ -29,6 +30,11 @@ public class Tables {
      * The table <code>public.clients</code>.
      */
     public static final Clients CLIENTS = Clients.CLIENTS;
+
+    /**
+     * The table <code>public.court_orgs</code>.
+     */
+    public static final CourtOrgs COURT_ORGS = CourtOrgs.COURT_ORGS;
 
     /**
      * The table <code>public.databasechangelog</code>.

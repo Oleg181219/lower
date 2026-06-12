@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -45,33 +44,19 @@ public class SecurityConfig {
 
                 // Настраиваем авторизацию запросов
                 .authorizeHttpRequests(auth -> auth
-                                // Публичные эндпоинты (авторизация, регистрация)
-                                .requestMatchers("/api/auth/authenticate").permitAll()
-//                        .requestMatchers("/api/auth/register/owner").hasRole("ADMIN")
-//                        .requestMatchers("/api/auth/register/staff").hasRole("OWNER")
-//                        .requestMatchers("/api/auth/register/client").hasAnyRole( "OWNER", "WORKER")
-                                .requestMatchers(
-                                        "/swagger-ui/**",
-                                        "/swagger-ui.html",
-                                        "/v3/api-docs/**",
-                                        "/swagger-resources/**",
-                                        "/webjars/**"
-                                ).permitAll()
-                                // Эндпоинты для администратора
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // Публичные точки (без токена)
+                        .requestMatchers("/api/auth/authenticate").permitAll()
+                        .requestMatchers("/api/auth/register/owner").permitAll()   // он сам проверяет заголовок ADMIN
+                        .requestMatchers("/api/auth/register/staff").permitAll()   // аналогично
+                        // Закрытая точка – только для ADMIN или OWNER
+                        .requestMatchers("/api/auth/register/client").hasAnyRole("ADMIN", "OWNER")
+                        // Swagger и статика
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
+                                "/swagger-resources/**", "/webjars/**").permitAll())
 
-                                // Эндпоинты для владельца (OWNER) и Админа
-                                .requestMatchers("/api/**").authenticated()
-                                // Все остальные запросы требуют аутентификации (наличия валидного токена)
-                                .anyRequest().authenticated()
-                )
+                        // Добавление JWT-фильтра
+                        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-                // Настраиваем сессию как STATELESS (не создаем HttpSession)
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Добавляем наш фильтр проверки JWT перед стандартным фильтром логина
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
