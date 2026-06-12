@@ -217,6 +217,20 @@ public class ClientsRecord extends UpdatableRecordImpl<ClientsRecord> {
         return (UUID) get(13);
     }
 
+    /**
+     * Setter for <code>public.clients.full_name_short</code>.
+     */
+    public void setFullNameShort(String value) {
+        set(14, value);
+    }
+
+    /**
+     * Getter for <code>public.clients.full_name_short</code>.
+     */
+    public String getFullNameShort() {
+        return (String) get(14);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -240,7 +254,7 @@ public class ClientsRecord extends UpdatableRecordImpl<ClientsRecord> {
     /**
      * Create a detached, initialised ClientsRecord
      */
-    public ClientsRecord(UUID id, String fullName, LocalDate birthDate, String birthPlace, String inn, String snils, String address, OffsetDateTime createdAt, OffsetDateTime updatedAt, String courtName, String caseNumber, LocalDate courtDecisionDate, String procedureType, UUID ownerId) {
+    public ClientsRecord(UUID id, String fullName, LocalDate birthDate, String birthPlace, String inn, String snils, String address, OffsetDateTime createdAt, OffsetDateTime updatedAt, String courtName, String caseNumber, LocalDate courtDecisionDate, String procedureType, UUID ownerId, String fullNameShort) {
         super(Clients.CLIENTS);
 
         setId(id);
@@ -257,6 +271,7 @@ public class ClientsRecord extends UpdatableRecordImpl<ClientsRecord> {
         setCourtDecisionDate(courtDecisionDate);
         setProcedureType(procedureType);
         setOwnerId(ownerId);
+        setFullNameShort(fullNameShort);
         resetTouchedOnNotNull();
     }
 }

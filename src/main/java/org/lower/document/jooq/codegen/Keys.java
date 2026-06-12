@@ -11,6 +11,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 import org.jooq.impl.QOM.ForeignKeyRule;
 import org.lower.document.jooq.codegen.tables.Clients;
+import org.lower.document.jooq.codegen.tables.CourtOrgs;
 import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
 import org.lower.document.jooq.codegen.tables.Documents;
 import org.lower.document.jooq.codegen.tables.Owners;
@@ -18,6 +19,7 @@ import org.lower.document.jooq.codegen.tables.RecipientOrgs;
 import org.lower.document.jooq.codegen.tables.Staffs;
 import org.lower.document.jooq.codegen.tables.Users;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
+import org.lower.document.jooq.codegen.tables.records.CourtOrgsRecord;
 import org.lower.document.jooq.codegen.tables.records.DatabasechangeloglockRecord;
 import org.lower.document.jooq.codegen.tables.records.DocumentsRecord;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
@@ -38,6 +40,9 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<ClientsRecord> CLIENTS_PKEY = Internal.createUniqueKey(Clients.CLIENTS, DSL.name("clients_pkey"), new TableField[] { Clients.CLIENTS.ID }, true);
+    public static final UniqueKey<ClientsRecord> UNIQUE_CLIENTS_INN = Internal.createUniqueKey(Clients.CLIENTS, DSL.name("unique_clients_inn"), new TableField[] { Clients.CLIENTS.INN }, true);
+    public static final UniqueKey<CourtOrgsRecord> COURT_ORGS_DOC_TYPE_REGION_CODE_KEY = Internal.createUniqueKey(CourtOrgs.COURT_ORGS, DSL.name("court_orgs_doc_type_region_code_key"), new TableField[] { CourtOrgs.COURT_ORGS.DOC_TYPE, CourtOrgs.COURT_ORGS.REGION_CODE }, true);
+    public static final UniqueKey<CourtOrgsRecord> COURT_ORGS_PKEY = Internal.createUniqueKey(CourtOrgs.COURT_ORGS, DSL.name("court_orgs_pkey"), new TableField[] { CourtOrgs.COURT_ORGS.ID }, true);
     public static final UniqueKey<DatabasechangeloglockRecord> DATABASECHANGELOGLOCK_PKEY = Internal.createUniqueKey(Databasechangeloglock.DATABASECHANGELOGLOCK, DSL.name("databasechangeloglock_pkey"), new TableField[] { Databasechangeloglock.DATABASECHANGELOGLOCK.ID }, true);
     public static final UniqueKey<DocumentsRecord> DOCUMENTS_PKEY = Internal.createUniqueKey(Documents.DOCUMENTS, DSL.name("documents_pkey"), new TableField[] { Documents.DOCUMENTS.ID }, true);
     public static final UniqueKey<OwnersRecord> OWNERS_PKEY = Internal.createUniqueKey(Owners.OWNERS, DSL.name("owners_pkey"), new TableField[] { Owners.OWNERS.ID }, true);

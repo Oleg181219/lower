@@ -2,20 +2,12 @@ package org.lower.document.services.tg;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.jooq.DSLContext;
 import org.lower.document.dto.TelegramAuthData;
-import org.lower.document.dto.UserShort;
 import org.lower.document.dto.WebAppUser;
 import org.lower.document.services.tg.parser.TelegramWebAppParser;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 
 @Service
@@ -32,7 +24,7 @@ public class UserService {
      * Возвращает короткий профиль.
      */
     @Transactional
-    public UserShort initOrLoginAuthOnly(String initDataRaw, Long referrerTelegramId) {
+    public Object initOrLoginAuthOnly(String initDataRaw, Long referrerTelegramId) {
         TelegramAuthData auth = parser.parseAndValidate(initDataRaw);
         WebAppUser tgmUser = auth.user();
 

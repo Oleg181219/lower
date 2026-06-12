@@ -3,6 +3,8 @@ package org.lower.document.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
+import org.lower.document.dto.ClientDto;
+import org.lower.document.dto.request.ClientRequest;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
 import org.springframework.stereotype.Repository;
 
@@ -26,18 +28,36 @@ public class ClientDao {
                 .fetchOne();
     }
 
-    public ClientsRecord createClient(String fullName, String inn, String snils, String address) {
-        dsl.insertInto(CLIENTS)
-                .set(CLIENTS.FULL_NAME, fullName)
-                .set(CLIENTS.INN, inn)
-                .set(CLIENTS.SNILS, snils)
-                .set(CLIENTS.ADDRESS, address)
-                .onConflict()
-                .doNothing()
-                .execute();
+    public ClientDto createClient(ClientRequest clientRequest, UUID ownerId) {
+        try {
+            ClientsRecord record = dsl.insertInto(CLIENTS)
+                    .set(CLIENTS.FULL_NAME, clientRequest.getFullName())
+                    .set(CLIENTS.FULL_NAME_SHORT, clientRequest.getFullNameShort())
+                    .set(CLIENTS.OWNER_ID, ownerId)
+                    .set(CLIENTS.BIRTH_DATE, clientRequest.getBirthDate())
+                    .set(CLIENTS.INN, clientRequest.getInn())
+                    .set(CLIENTS.SNILS, clientRequest.getSnils())
+                    .set(CLIENTS.ADDRESS, clientRequest.getAddress())
+                    .returning()
+                    .fetchOne();
+            return record != null ? fromRecord(record) : null;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
 
-        return dsl.selectFrom(CLIENTS)
-                .where(CLIENTS.ID.eq(UUID.randomUUID()))
-                .fetchOne();
+    public static ClientDto fromRecord(ClientsRecord record) {
+        return new ClientDto(
+                record.getId(),
+                record.getOwnerId(),
+                record.getFullName(),
+                record.getFullNameShort(),
+                record.getBirthDate(),
+                record.getBirthPlace(),
+                record.getInn(),
+                record.getSnils(),
+                record.getAddress()
+        );
     }
 }

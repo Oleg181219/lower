@@ -130,6 +130,11 @@ public class Clients extends TableImpl<ClientsRecord> {
      */
     public final TableField<ClientsRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID, this, "");
 
+    /**
+     * The column <code>public.clients.full_name_short</code>.
+     */
+    public final TableField<ClientsRecord, String> FULL_NAME_SHORT = createField(DSL.name("full_name_short"), SQLDataType.VARCHAR(256), this, "");
+
     private Clients(Name alias, Table<ClientsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -200,6 +205,11 @@ public class Clients extends TableImpl<ClientsRecord> {
     @Override
     public UniqueKey<ClientsRecord> getPrimaryKey() {
         return Keys.CLIENTS_PKEY;
+    }
+
+    @Override
+    public List<UniqueKey<ClientsRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.UNIQUE_CLIENTS_INN);
     }
 
     @Override

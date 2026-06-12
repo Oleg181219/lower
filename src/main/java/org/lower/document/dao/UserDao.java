@@ -21,18 +21,23 @@ public class UserDao {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordService passwordService;
 
-    public UsersRecord findByUsername(String username){
-       return dsl.selectFrom(USERS)
+    public UsersRecord findByUsername(String username) {
+        return dsl.selectFrom(USERS)
                 .where(USERS.USERNAME.eq(username))
-               .fetchOne();
+                .fetchOne();
     }
 
     public UsersRecord createUser(OwnerRequest ownerRequest, RoleEnum roleEnum) {
-        return dsl.insertInto(USERS)
-                .set(USERS.USERNAME, ownerRequest.getEmail())
-                .set(USERS.ROLE, roleEnum)
-                .set(USERS.PASSWORD, passwordService.hashPassword(ownerRequest.getPassword()))
-                .returning()
-                .fetchOne();
+        try {
+            return dsl.insertInto(USERS)
+                    .set(USERS.USERNAME, ownerRequest.getEmail())
+                    .set(USERS.ROLE, roleEnum)
+                    .set(USERS.PASSWORD, passwordService.hashPassword(ownerRequest.getPassword()))
+                    .returning()
+                    .fetchOne();
+        } catch (Exception e) {
+            log.warn(e.getLocalizedMessage());
+            return null;
+        }
     }
 }
