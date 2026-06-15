@@ -33,17 +33,17 @@ import java.util.UUID;
 public class PdfGenerationService {
 
     private final TemplateEngine templateEngine;
-    private final ClientDao clientService;
+    private final ClientDao clientDao;
     private final OwnerDao lawyerService;
     // Возможно, понадобится сервис для получения адресов органов по региону
-    private final RecipientLookupService recipientLookupService;
+    private final ClientService clientService;
 
     /**
      * Основной метод генерации пакета документов по ID.
      */
     public List<GeneratedFileDto> generateDocuments(BatchGenerationRequest request) {
         List<GeneratedFileDto> result = new ArrayList<>();
-
+/*
         // 1. Загружаем данные из БД
         ClientsRecord client = clientService.getClientByUuid(request.getClientId());
         OwnersRecord lawyer = lawyerService.getLawyerByUuid(request.getLawyerId());
@@ -53,7 +53,7 @@ public class PdfGenerationService {
             try {
                 // Определяем данные получателя (органа) для этого типа документа
                 // Логика может быть разной: хардкод, справочник в БД, зависимость от региона клиента
-                var recipient = recipientLookupService.getRecipient(docType, client);
+                var recipient = clientService.getRecipient(docType, client);
 
                 // 3. Формируем контекст для Thymeleaf
                 Context context = buildContext(client, lawyer, recipient, request.getRequestDate(), docType);
@@ -77,7 +77,7 @@ public class PdfGenerationService {
                 throw new RuntimeException("Ошибка при генерации " + docType + ": " + e.getMessage(), e);
             }
         }
-
+*/
         return result;
     }
 

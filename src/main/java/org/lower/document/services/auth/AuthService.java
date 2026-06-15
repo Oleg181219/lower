@@ -20,6 +20,7 @@ import org.lower.document.dto.response.StaffResponse;
 import org.lower.document.jooq.codegen.enums.RoleEnum;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
+import org.lower.document.services.UtilService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,6 +44,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AppProperties appProperties;
+    private final UtilService utilService;
 
     @Transactional
     public OwnerResponse createOwner(OwnerRequest ownerRequest, Map<String, String> headers) {
@@ -113,7 +115,7 @@ public class AuthService {
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     public StaffResponse createStaff(StaffRequest request, Map<String, String> headers) {
         // 1. Узнаем, кто создает (текущий Owner)
-        OwnersRecord currentOwner = getOwnersRecord();
+        OwnersRecord currentOwner = utilService.getOwnersRecord();
         if (currentOwner == null) {
             throw new RuntimeException("Current user is not an owner");
         }
@@ -139,21 +141,12 @@ public class AuthService {
         return new StaffResponse();
     }
 
-    private OwnersRecord getOwnersRecord() {
-        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
-        UsersRecord currentUser = userDao.findByUsername(currentUserName);
-
-        // Находим его запись в таблице owners, чтобы получить owner_id
-        return ownerDao.findByUsername(currentUserName);
-    }
-
-
     @Transactional
     public ClientResponce createClient(ClientRequest request) {
         if (ObjectUtils.isEmpty(request)) {
             return null;
         }
-        OwnersRecord currentOwner = getOwnersRecord();
+        OwnersRecord currentOwner = utilService.getOwnersRecord();
         if (currentOwner == null) {
             throw new RuntimeException("Current user is not an owner");
         }

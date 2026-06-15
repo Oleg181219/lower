@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register/staff").permitAll()   // аналогично
                         // Закрытая точка – только для ADMIN или OWNER
                         .requestMatchers("/api/auth/register/client").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/documents/getClients").hasAnyRole("ADMIN", "OWNER")
                         // Swagger и статика
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
                                 "/swagger-resources/**", "/webjars/**").permitAll())
