@@ -12,5 +12,5 @@ public class BatchGenerationRequest {
     private UUID clientId;
     private UUID lawyerId;
     private LocalDate requestDate;
-    private List<String> documentTypes;
+    private List<UUID> documentsIds;
 }

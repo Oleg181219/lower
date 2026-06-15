@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.lower.document.dto.ClientDto;
+import org.lower.document.dto.ClientSprDto;
 import org.lower.document.dto.request.ClientRequest;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.lower.document.jooq.codegen.tables.Clients.CLIENTS;
@@ -18,8 +21,17 @@ import static org.lower.document.jooq.codegen.tables.Clients.CLIENTS;
 public class ClientDao {
     private final DSLContext dsl;
 
-    public void insert() {
-
+    public List<ClientSprDto> getClientsByOwnerId(UUID ownerId) {
+        return dsl.selectFrom(CLIENTS)
+                .where(CLIENTS.OWNER_ID.eq(ownerId))
+                .fetchInto(ClientsRecord.class)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(r -> new ClientSprDto(r.getId(),
+                        r.getOwnerId(),
+                        r.getFullName(),
+                        r.getFullNameShort()))
+                .toList();
     }
 
     public ClientsRecord getClientByUuid(UUID clientId) {
