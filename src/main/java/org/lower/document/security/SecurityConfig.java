@@ -1,5 +1,6 @@
 package org.lower.document.security;
 
+import jakarta.servlet.DispatcherType;
 import org.lower.document.auth.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -46,14 +47,23 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Публичные точки (без токена)
                         .requestMatchers("/api/auth/authenticate").permitAll()
-                        .requestMatchers("/api/auth/register/owner").permitAll()   // он сам проверяет заголовок ADMIN
-                        .requestMatchers("/api/auth/register/staff").permitAll()   // аналогично
+                        // Проверка внутри
+                        .requestMatchers("/api/auth/register/owner").permitAll()
+                        // Игнорируем async dispatch для всех URL
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+
                         // Закрытая точка – только для ADMIN или OWNER
                         .requestMatchers("/api/auth/register/client").hasAnyRole("ADMIN", "OWNER")
                         .requestMatchers("/api/documents/getClients").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/auth/register/staff").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/documents/generate").hasAnyRole("ADMIN", "OWNER")
+
                         // Swagger и статика
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
-                                "/swagger-resources/**", "/webjars/**").permitAll())
+                        .requestMatchers("/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**").permitAll())
 
                         // Добавление JWT-фильтра
                         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

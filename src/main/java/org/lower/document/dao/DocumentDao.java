@@ -6,6 +6,7 @@ import org.jooq.DSLContext;
 import org.jooq.JSONB;
 import org.lower.document.jooq.codegen.tables.records.DocumentsRecord;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ import static org.lower.document.jooq.codegen.tables.Documents.DOCUMENTS;
 
 
 @Slf4j
-@Component
+@Repository
 @RequiredArgsConstructor
 public class DocumentDao{
     private final DSLContext dsl;

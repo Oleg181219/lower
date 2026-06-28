@@ -8,13 +8,14 @@ import org.lower.document.dto.request.OwnerRequest;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 import static org.lower.document.jooq.codegen.Tables.OWNERS;
 
 @Slf4j
-@Component
+@Repository
 @RequiredArgsConstructor
 public class OwnerDao {
     private final DSLContext dsl;
@@ -51,9 +52,9 @@ public class OwnerDao {
         }
     }
 
-    public OwnersRecord getLawyerByUuid(UUID lawyerId) {
+    public OwnersRecord getOwnerByUuid(UUID ownerId) {
         return dsl.selectFrom(OWNERS)
-                .where(OWNERS.ID.eq(lawyerId))
+                .where(OWNERS.ID.eq(ownerId))
                 .fetchOne();
     }
 }

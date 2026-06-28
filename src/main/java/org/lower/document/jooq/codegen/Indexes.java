@@ -8,6 +8,7 @@ import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
+import org.lower.document.jooq.codegen.tables.CourtDecisions;
 import org.lower.document.jooq.codegen.tables.CourtOrgs;
 
 
@@ -21,6 +22,7 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index IDX_COURT_DECISIONS_CLIENT_CASE_NUMBER = Internal.createIndex(DSL.name("idx_court_decisions_client_case_number"), CourtDecisions.COURT_DECISIONS, new OrderField[] { CourtDecisions.COURT_DECISIONS.CLIENT_ID, CourtDecisions.COURT_DECISIONS.CASE_NUMBER }, true);
     public static final Index IDX_COURT_ORGS_TYPE_ACTIVE = Internal.createIndex(DSL.name("idx_court_orgs_type_active"), CourtOrgs.COURT_ORGS, new OrderField[] { CourtOrgs.COURT_ORGS.DOC_TYPE }, false);
     public static final Index IDX_COURT_ORGS_TYPE_REGION = Internal.createIndex(DSL.name("idx_court_orgs_type_region"), CourtOrgs.COURT_ORGS, new OrderField[] { CourtOrgs.COURT_ORGS.DOC_TYPE, CourtOrgs.COURT_ORGS.REGION_CODE }, false);
 }

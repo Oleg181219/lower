@@ -1,5 +1,6 @@
 package org.lower.document.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lower.document.dto.request.AuthRequest;
@@ -86,7 +87,7 @@ public class AuthController {
      */
     @PreAuthorize("hasRole('OWNER')")
     @PostMapping("/register/client")
-    public ResponseEntity<ClientResponce> client(@RequestBody ClientRequest request) {
+    public ResponseEntity<ClientResponce> client(@Valid @RequestBody ClientRequest request) {
         return ResponseEntity.ok().body(authService.createClient(request));
     }
 

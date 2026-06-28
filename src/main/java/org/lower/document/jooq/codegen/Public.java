@@ -15,6 +15,7 @@ import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SchemaImpl;
 import org.lower.document.jooq.codegen.tables.Clients;
+import org.lower.document.jooq.codegen.tables.CourtDecisions;
 import org.lower.document.jooq.codegen.tables.CourtOrgs;
 import org.lower.document.jooq.codegen.tables.Databasechangelog;
 import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
@@ -44,6 +45,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.clients</code>.
      */
     public final Clients CLIENTS = Clients.CLIENTS;
+
+    /**
+     * Таблица судебных решений по делам о банкротстве
+     */
+    public final CourtDecisions COURT_DECISIONS = CourtDecisions.COURT_DECISIONS;
 
     /**
      * The table <code>public.court_orgs</code>.
@@ -141,6 +147,7 @@ public class Public extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             Clients.CLIENTS,
+            CourtDecisions.COURT_DECISIONS,
             CourtOrgs.COURT_ORGS,
             Databasechangelog.DATABASECHANGELOG,
             Databasechangeloglock.DATABASECHANGELOGLOCK,

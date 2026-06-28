@@ -1,10 +1,9 @@
 package org.lower.document.dto;
 
-import lombok.Data;
+public record CourtInfo(
+        String courtName,
+        String decisionDate,
+        String caseNumber
 
-@Data
-public class CourtInfo {
-    private String courtName;
-    private String decisionDate;
-    private String caseNumber;
+) {
 }

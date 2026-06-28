@@ -5,12 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.lower.document.dto.GeneratedFileDto;
 import org.lower.document.dto.request.BatchGenerationRequest;
 import org.lower.document.dto.response.ClientsResonse;
+import org.lower.document.dto.response.OrgResponse;
 import org.lower.document.services.ClientService;
+import org.lower.document.services.OrgService;
 import org.lower.document.services.PdfGenerationService;
+import org.lower.document.util.MoscowTimeProvider;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -19,7 +26,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentController {
     private final ClientService clientService;
+    private final OrgService orgService;
     private final PdfGenerationService pdfGenerationService;
+    private final MoscowTimeProvider timeProvider;
+
 
     /**
      * Эндпоинт для получения списков клиентов по владельцу(айдишка владельца через анализ токена).
@@ -31,16 +41,36 @@ public class DocumentController {
     }
 
     /**
+     * Эндпоинт для получения списков клиентов по владельцу(айдишка владельца через анализ токена).
+     */
+    @GetMapping("/getOrganizations/{region}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<OrgResponse>> getOrganizations(@RequestParam String region) {
+        return ResponseEntity.ok(orgService.getOrganizations(region));
+    }
+
+    /**
      * Эндпоинт для генерации документов.
      * Возвращает JSON массив с файлами (имя + base64 контент).
      * Фронтенд сам решает, скачивать их по отдельности или упаковать в ZIP.
      */
+
     @PostMapping("/generate")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<List<GeneratedFileDto>> generateDocuments(@RequestBody BatchGenerationRequest request) {
+    public ResponseEntity<StreamingResponseBody> generateDocuments(
+            @RequestBody BatchGenerationRequest request) {
 
-        List<GeneratedFileDto> files = pdfGenerationService.generateDocuments(request);
+        // Формируем имя файла с текущей датой/временем
+        String fileName = String.format("documents_%s.zip",
+                timeProvider.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
 
-        return ResponseEntity.ok(files);
+        // StreamingResponseBody будет записывать данные прямо в HTTP-ответ
+        StreamingResponseBody responseBody = outputStream ->
+                pdfGenerationService.generateAndStreamToZip(request, outputStream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .body(responseBody);
     }
 }

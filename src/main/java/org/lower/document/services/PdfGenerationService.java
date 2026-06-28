@@ -5,194 +5,209 @@ import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.lower.document.dao.ClientDao;
-import org.lower.document.dao.OwnerDao;
-import org.lower.document.dto.CourtInfo;
-import org.lower.document.dto.DebtorInfo;
-import org.lower.document.dto.LawyerInfo;
+import org.lower.document.dao.CourtDecisionDao;
+import org.lower.document.dao.OrgDao;
+import org.lower.document.dto.*;
 import org.lower.document.dto.request.BatchGenerationRequest;
-import org.lower.document.dto.GeneratedFileDto;
-import org.lower.document.dto.RecipientInfoDto;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
+import org.lower.document.jooq.codegen.tables.records.CourtDecisionsRecord;
+import org.lower.document.jooq.codegen.tables.records.CourtOrgsRecord;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
+import org.lower.document.services.document.PdfDocumentGenerator;
+import org.lower.document.util.MoscowTimeProvider;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PdfGenerationService {
 
-    private final TemplateEngine templateEngine;
-    private final ClientDao clientDao;
-    private final OwnerDao lawyerService;
-    // Возможно, понадобится сервис для получения адресов органов по региону
+    private final UtilService utilService;
+    private final OrgDao orgDao;
+    private final CourtDecisionDao courtDecisionDao;
     private final ClientService clientService;
+    private final MoscowTimeProvider timeProvider;
+    private final PdfDocumentGenerator pdfGenerator;
+
+    // Пул потоков для параллельной генерации PDF (CPU-bound задача)
+    // Ограничиваем до 4 потоков, чтобы не перегружать CPU и память
+    private final ExecutorService pdfExecutor = Executors.newFixedThreadPool(
+            4,
+            Thread.ofPlatform().name("pdf-gen-", 0).factory()
+    );
 
     /**
-     * Основной метод генерации пакета документов по ID.
+     * Основной метод: генерирует документы и стримит их в ZIP напрямую в OutputStream.
+     * Не использует промежуточное хранение в Base64.
      */
-    public List<GeneratedFileDto> generateDocuments(BatchGenerationRequest request) {
-        List<GeneratedFileDto> result = new ArrayList<>();
-/*
-        // 1. Загружаем данные из БД
-        ClientsRecord client = clientService.getClientByUuid(request.getClientId());
-        OwnersRecord lawyer = lawyerService.getLawyerByUuid(request.getLawyerId());
+    public void generateAndStreamToZip(BatchGenerationRequest request, OutputStream outputStream) {
+        log.info("Начинаем генерацию {} документов для клиента {}",
+                request.getDocumentsIds().size(), request.getClientId());
 
-        // 2. Проходим по каждому запрошенному типу документа
-        for (String docType : request.getDocumentTypes()) {
-            try {
-                // Определяем данные получателя (органа) для этого типа документа
-                // Логика может быть разной: хардкод, справочник в БД, зависимость от региона клиента
-                var recipient = clientService.getRecipient(docType, client);
+        // 1. Загружаем общие данные из БД (один раз на все документы)
+        OwnersRecord currentOwner = Optional.ofNullable(utilService.getOwnersRecord())
+                .orElseThrow(() -> new RuntimeException("Current user is not an owner"));
 
-                // 3. Формируем контекст для Thymeleaf
-                Context context = buildContext(client, lawyer, recipient, request.getRequestDate(), docType);
+        ClientsRecord client = Optional.ofNullable(clientService.getClientById(request.getClientId()))
+                .orElseThrow(() -> new RuntimeException("Client not found"));
 
-                // 4. Рендерим HTML
-                String templateName = getTemplateName(docType);
-                String html = templateEngine.process(templateName, context);
+        // Загружаем все активные организации для региона клиента
+        List<CourtOrgsRecord> orgs = orgDao.getActiveOrganizationsRecByRegion(client.getRegion());
 
-                // 5. Конвертируем в PDF
-                byte[] pdfBytes = convertHtmlToPdf(html);
+        // Загружаем дело, по которому идет формирование документов.
+        CourtDecisionsRecord courtDecisionsRecord =
+                Optional.ofNullable(courtDecisionDao.findByClientIdAnOwnerId(client.getId(), currentOwner.getId()))
+                        .orElseThrow(() -> new RuntimeException("Court decision not found"));
+        // Создаем мапу для быстрого поиска организации по ID записи
+        // Ключ: id (UUID из таблицы court_orgs), Значение: CourtOrgsRecord
+        Map<UUID, CourtOrgsRecord> orgsById = orgs.stream()
+                .collect(Collectors.toMap(
+                        CourtOrgsRecord::getId,
+                        Function.identity(),
+                        (existing, replacement) -> {
+                            log.warn("Дублирующийся ID организации: {}. Используется первая запись.", existing.getId());
+                            return existing;
+                        }
+                ));
 
-                // 6. Формируем имя файла
-                String fileName = generateFileName(docType, client.getFullName(), request.getRequestDate());
+        // 2. Параллельная генерация PDF для каждого документа
+        // documentsIds — это список UUID записей из таблицы court_orgs
+        List<GeneratedPdf> generatedPdfs = request.getDocumentsIds().parallelStream()
+                .map(orgId -> generateSinglePdf(orgId, client, currentOwner, orgsById, courtDecisionsRecord))
+                .toList();
 
-                result.add(new GeneratedFileDto(fileName, Base64.getEncoder().encodeToString(pdfBytes)));
-
-                log.info("Сгенерирован документ: {} для клиента: {}", docType, client.getId());
-
-            } catch (Exception e) {
-                log.error("Ошибка генерации документа {}: {}", docType, e.getMessage());
-                throw new RuntimeException("Ошибка при генерации " + docType + ": " + e.getMessage(), e);
+        // 3. Последовательная запись в ZIP (ZipOutputStream не потокобезопасен)
+        try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
+            for (GeneratedPdf pdf : generatedPdfs) {
+                ZipEntry entry = new ZipEntry(pdf.fileName());
+                zipOut.putNextEntry(entry);
+                zipOut.write(pdf.pdfBytes());
+                zipOut.closeEntry();
+                log.debug("Добавлен в ZIP: {}", pdf.fileName());
             }
+            zipOut.finish();
+            log.info("ZIP-архив успешно сформирован, всего документов: {}", generatedPdfs.size());
+        } catch (Exception e) {
+            log.error("Ошибка при формировании ZIP-архива", e);
+            throw new RuntimeException("Не удалось создать ZIP-архив", e);
         }
-*/
-        return result;
     }
 
     /**
-     * Сборка контекста переменных для шаблона.
+     * Генерация одного PDF документа (вызывается параллельно для каждого orgId)
+     *
+     * @param orgId UUID записи из таблицы court_orgs
      */
-    private Context buildContext(ClientsRecord client, OwnersRecord lawyer,
-                                 RecipientInfoDto recipient,
-                                 java.time.LocalDate requestDate, String docType) {
+    @SneakyThrows
+    private GeneratedPdf generateSinglePdf(UUID orgId, ClientsRecord client, OwnersRecord owner,
+                                           Map<UUID, CourtOrgsRecord> orgsById, CourtDecisionsRecord courtDecisionsRecord) {
+        CourtOrgsRecord orgRecord = orgsById.get(orgId);
+        String docType = orgRecord.getDocType();
 
-        Context context = new Context();
+        // Создаем DTO с данными
+        FsspDocumentData data = buildFsspDocumentData(client, owner, orgRecord, courtDecisionsRecord);
 
-        // --- Данные должника (маппинг из Record в объект или прямо поля) ---
-        // Лучше создать DTO DebtorInfo из ClientsRecord, но для краткости покажем концепцию
-        context.setVariable("debtor", mapClientToDebtorInfo(client));
+        // Генерируем PDF через интерфейс
+        byte[] pdfBytes = pdfGenerator.generate(data);
 
-        // --- Данные суда (предполагаем, что они хранятся в таблице clients или связаны) ---
-        // Если суд общий для всех запросов клиента, берем из клиента.
-        // Если нет - нужна отдельная таблица court_cases.
-        context.setVariable("courtDecision", mapClientToCourtInfo(client));
-
-        // --- Процедура (обычно фиксирована или хранится в деле о банкротстве) ---
-        context.setVariable("procedure", "реализации имущества");
-
-        // --- Данные юриста (Владельца) ---
-        context.setVariable("lawyer", mapOwnerToLawyerInfo(lawyer));
-
-        // --- Данные получателя (Органа) ---
-        context.setVariable("recipientOrgName", recipient.getOrgName());
-        context.setVariable("recipientOrgAddress", recipient.getOrgAddress());
-        context.setVariable("recipientOrgNote", recipient.getOrgNote());
-
-        // --- Дата запроса (передается с фронта) ---
-        context.setVariable("requestDate", requestDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-
-        // --- Тип шаблона (для условной логики внутри шаблона, если нужно) ---
-        context.setVariable("templateType", docType);
-
-        return context;
+        String fileName = generateFileName(docType, client.getFullName());
+        return new GeneratedPdf(fileName, pdfBytes);
     }
 
-    // --- Вспомогательные методы маппинга (примерные реализации) ---
-
-    private DebtorInfo mapClientToDebtorInfo(ClientsRecord client) {
-        var info = new DebtorInfo();
-        info.setFullName(client.getFullName());
-        // Разбиваем ФИО на короткие для подписи, если в БД нет отдельного поля
-        String[] parts = client.getFullName().split(" ");
-        if (parts.length >= 2) {
-            info.setFullNameShort(parts[0] + " " + parts[1].charAt(0) + ". " + (parts.length > 2 ? parts[2].charAt(0) + "." : ""));
-        } else {
-            info.setFullNameShort(client.getFullName());
-        }
-
-        info.setBirthDate(client.getBirthDate());
-        info.setBirthPlace(client.getBirthPlace());
-        info.setInn(client.getInn());
-        info.setSnils(client.getSnils());
-        info.setAddress(client.getAddress());
-        return info;
-    }
-
-    private CourtInfo mapClientToCourtInfo(ClientsRecord client) {
-        return new CourtInfo(/*
-                client.getCourtName(),
-                client.getCourtDecisionDate() != null ? client.getCourtDecisionDate().toString() : "данные отсутствуют",
-                client.getCaseNumber()*/
+    private FsspDocumentData buildFsspDocumentData(ClientsRecord client, OwnersRecord owner,
+                                                   CourtOrgsRecord org, CourtDecisionsRecord courtDecisionsRecord) {
+        return new FsspDocumentData(
+                new TrusteeData(
+                        owner.getFullName(),
+                        owner.getFullNameShort(),
+                        client.getFullNameGenitive(),
+                        owner.getMailAddress(),
+                        owner.getEmail(),
+                        owner.getUserInn(),
+                        owner.getUserSnils(),
+                        owner.getSroName(),
+                        owner.getSroOgrn(),
+                        owner.getSroInn(),
+                        owner.getSroAddress()
+                ),
+                new RecipientData(org.getOrgName(), org.getOrgAddress()),
+                new DebtorData(
+                        client.getFullName(),
+                        client.getFullNameGenitive(),
+                        client.getFullNameShort(),
+                        client.getFullNameShortGenitive(),
+                        client.getBirthDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
+                        client.getBirthPlace(),
+                        client.getInn(),
+                        client.getSnils(),
+                        client.getAddress()
+                ),
+                new CourtDecisionData(
+                        courtDecisionsRecord.getCourtName(),
+                        courtDecisionsRecord.getDecisionDate() != null ?
+                                courtDecisionsRecord.getDecisionDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "01.12.2026",
+                        courtDecisionsRecord.getCaseNumber()
+                ),
+                "реализации имущества"
         );
     }
 
-    private LawyerInfo mapOwnerToLawyerInfo(OwnersRecord owner) {
-        var info = new LawyerInfo();
-        info.setFullName(owner.getFullName());
-        info.setFullNameShort(owner.getFullNameShort());
-        info.setMailAddress(owner.getMailAddress());
-        info.setEmail(owner.getEmail());
-        info.setInn(owner.getUserInn());
-        info.setSnils(owner.getUserSnils());
-        info.setSroName(owner.getSroName());
-        info.setSroOgrn(owner.getSroOgrn());
-        info.setSroInn(owner.getSroInn());
-        info.setSroAddress(owner.getSroAddress());
-        return info;
-    }
-
-    private byte[] convertHtmlToPdf(String html) throws Exception {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (PdfDocument pdfDocument = new PdfDocument(new PdfWriter(baos))) {
-            ConverterProperties properties = new ConverterProperties();
-            HtmlConverter.convertToPdf(html, pdfDocument, properties);
-        }
-        return baos.toByteArray();
-    }
-
-    private String generateFileName(String type, String debtorFullName, java.time.LocalDate date) {
+    /**
+     * Генерация имени файла для PDF
+     */
+    private String generateFileName(String type, String debtorFullName) {
         String surname = debtorFullName.split(" ")[0];
-        String dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        return String.format("%s_%s_%s_%s.pdf", type.toUpperCase(), surname, dateStr, UUID.randomUUID().toString().substring(0, 8));
+        String dateStr = timeProvider.today().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return String.format("%s_%s_%s.pdf",
+                type.toUpperCase(),
+                surname,
+                dateStr);
     }
 
+    /**
+     * Получение имени шаблона по типу документа.
+     * Реализован только FSSP, остальные - заглушки.
+     */
     private String getTemplateName(String type) {
         return switch (type.toLowerCase()) {
-            case "fsps" -> "fsps-request";
-            case "osfr" -> "osfr-request";
-            case "bti" -> "bti-request";
-            case "mifns" -> "mifns-request";
-            case "mchs" -> "mchs-request";
-            case "gibdd" -> "gibdd-request";
-            case "rosimushchestvo" -> "rosimushchestvo-request";
-            case "rospatent" -> "rospatent-request";
-            case "rosaviatsia" -> "rosaviatsia-request";
-            case "rostekhnadzor" -> "rostekhnadzor-request";
-            case "court" -> "court-request";
-            case "rosgruard" -> "rosgruard-request";
-            default -> throw new IllegalArgumentException("Неизвестный тип: " + type);
+            case "fsps" -> "fsps-notification";
+            case "osfr" -> throw new UnsupportedOperationException("Шаблон OSFR еще не реализован");
+            case "bti" -> throw new UnsupportedOperationException("Шаблон BTI еще не реализован");
+            case "mifns" -> throw new UnsupportedOperationException("Шаблон MIFNS еще не реализован");
+            case "mchs" -> throw new UnsupportedOperationException("Шаблон MCHS еще не реализован");
+            case "gibdd" -> throw new UnsupportedOperationException("Шаблон GIBDD еще не реализован");
+            case "rosimushchestvo" ->
+                    throw new UnsupportedOperationException("Шаблон ROSIMUSHCHESTVO еще не реализован");
+            case "rospatent" -> throw new UnsupportedOperationException("Шаблон ROSPATENT еще не реализован");
+            case "rosaviatsia" -> throw new UnsupportedOperationException("Шаблон ROSAVIATSIA еще не реализован");
+            case "rostekhnadzor" -> throw new UnsupportedOperationException("Шаблон ROSTEKHNADZOR еще не реализован");
+            case "court" -> throw new UnsupportedOperationException("Шаблон COURT еще не реализован");
+            case "rosgruard" -> throw new UnsupportedOperationException("Шаблон ROSGRUARD еще не реализован");
+            default -> throw new IllegalArgumentException("Неизвестный тип документа: " + type);
         };
+    }
+
+    /**
+     * Внутренний record для хранения результата генерации одного PDF
+     */
+    private record GeneratedPdf(String fileName, byte[] pdfBytes) {
     }
 }
