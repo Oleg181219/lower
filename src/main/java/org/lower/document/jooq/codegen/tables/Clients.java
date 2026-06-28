@@ -34,6 +34,7 @@ import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 import org.lower.document.jooq.codegen.Keys;
 import org.lower.document.jooq.codegen.Public;
+import org.lower.document.jooq.codegen.enums.RegionEnum;
 import org.lower.document.jooq.codegen.tables.Documents.DocumentsPath;
 import org.lower.document.jooq.codegen.tables.Owners.OwnersPath;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
@@ -106,26 +107,6 @@ public class Clients extends TableImpl<ClientsRecord> {
     public final TableField<ClientsRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
-     * The column <code>public.clients.court_name</code>.
-     */
-    public final TableField<ClientsRecord, String> COURT_NAME = createField(DSL.name("court_name"), SQLDataType.VARCHAR(500), this, "");
-
-    /**
-     * The column <code>public.clients.case_number</code>.
-     */
-    public final TableField<ClientsRecord, String> CASE_NUMBER = createField(DSL.name("case_number"), SQLDataType.VARCHAR(100), this, "");
-
-    /**
-     * The column <code>public.clients.court_decision_date</code>.
-     */
-    public final TableField<ClientsRecord, LocalDate> COURT_DECISION_DATE = createField(DSL.name("court_decision_date"), SQLDataType.LOCALDATE, this, "");
-
-    /**
-     * The column <code>public.clients.procedure_type</code>.
-     */
-    public final TableField<ClientsRecord, String> PROCEDURE_TYPE = createField(DSL.name("procedure_type"), SQLDataType.VARCHAR(100), this, "");
-
-    /**
      * The column <code>public.clients.owner_id</code>.
      */
     public final TableField<ClientsRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID, this, "");
@@ -134,6 +115,21 @@ public class Clients extends TableImpl<ClientsRecord> {
      * The column <code>public.clients.full_name_short</code>.
      */
     public final TableField<ClientsRecord, String> FULL_NAME_SHORT = createField(DSL.name("full_name_short"), SQLDataType.VARCHAR(256), this, "");
+
+    /**
+     * The column <code>public.clients.region</code>.
+     */
+    public final TableField<ClientsRecord, RegionEnum> REGION = createField(DSL.name("region"), SQLDataType.VARCHAR.asEnumDataType(RegionEnum.class), this, "");
+
+    /**
+     * The column <code>public.clients.full_name_genitive</code>.
+     */
+    public final TableField<ClientsRecord, String> FULL_NAME_GENITIVE = createField(DSL.name("full_name_genitive"), SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>public.clients.full_name_short_genitive</code>.
+     */
+    public final TableField<ClientsRecord, String> FULL_NAME_SHORT_GENITIVE = createField(DSL.name("full_name_short_genitive"), SQLDataType.VARCHAR(255), this, "");
 
     private Clients(Name alias, Table<ClientsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

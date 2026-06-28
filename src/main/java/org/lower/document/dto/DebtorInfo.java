@@ -7,6 +7,8 @@ import java.time.LocalDate;
 @Data
 public class DebtorInfo {
     private String fullName;
+    private String fullNameGenitive;
+    private String fullNameShortGenitive;
     private String fullNameShort;
     private LocalDate birthDate;
     private String birthPlace;

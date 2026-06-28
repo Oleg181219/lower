@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class LawyerInfo {
     private String fullName;
+    private String fullNameGenitive;
     private String fullNameShort;
     private String mailAddress;
     private String email;

@@ -4,170 +4,244 @@
     <meta charset="UTF-8">
     <title>Запрос-уведомление ФССП</title>
     <style>
-        body {
-            font-family: "Times New Roman", serif;
-            font-size: 12pt;
-            margin: 2cm;
-            line-height: 1.5;
+        @page {
+            size: A4 portrait;
+            margin: 1cm 1.5cm 1.5cm 2cm;
         }
-        .header {
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 11pt;
+            margin: 0;
+            padding: 0;
+            line-height: 1.2;
+            text-align: justify;
+        }
+
+        /* ===== ШАПКА: две колонки ===== */
+        .header-table {
+            width: 100%;
+            border: none;
+            border-collapse: collapse;
+            margin-bottom: 0.4cm;
+        }
+        .header-table td {
+            border: none;
+            vertical-align: top;
+            padding: 0;
+            font-size: 11pt;
+            line-height: 1.3;
+        }
+        .header-left {
+            width: 50%;
+            text-align: left;
+            padding-right: 0.5cm;
+        }
+        .header-right {
+            width: 50%;
+            text-align: right;
+            padding-left: 0.5cm;
+        }
+
+        /* ===== ЗАГОЛОВОК ===== */
+        .doc-title {
             text-align: center;
             font-weight: bold;
-            font-size: 14pt;
-            margin-bottom: 1cm;
+            font-size: 12pt;
+            margin-bottom: 0.4cm;
+            text-indent: 0;
         }
-        .section {
-            margin-bottom: 0.5cm;
+
+        /* ===== ОСНОВНЫЕ АБЗАЦЫ ===== */
+        .para {
+            margin: 0;
+            padding: 0;
+            text-align: justify;
+            text-indent: 0.8cm;
+            line-height: 1.2;
         }
-        .field-label {
-            display: inline-block;
-            width: 180px;
-            font-weight: bold;
+        .para-no-indent {
+            margin: 0;
+            padding: 0;
+            text-align: justify;
+            text-indent: 0;
+            line-height: 1.2;
         }
-        .field-value {
-            display: inline-block;
-            max-width: 70%;
-            word-wrap: break-word;
-        }
-        .underline {
-            text-decoration: underline;
-        }
-        .bold {
-            font-weight: bold;
-        }
-        .indent {
-            text-indent: 1.25cm;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+
+        /* ===== СТИЛИ ТЕКСТА ===== */
+        .bold { font-weight: bold; }
+        .underline { text-decoration: underline; }
+
+        /* ===== ОТСУП ПЕРЕД ЛОГИЧЕСКИМИ БЛОКАМИ ===== */
+        .spacer {
             margin-top: 0.3cm;
         }
-        td, th {
-            border: 1px solid black;
-            padding: 4px;
+
+        /* ===== ПОДПИСИ ВНИЗУ ===== */
+        .signature-table {
+            width: 100%;
+            border: none;
+            border-collapse: collapse;
+            margin-top: 0.6cm;
+        }
+        .signature-table td {
+            border: none;
             vertical-align: top;
+            padding: 0;
+            width: 50%;
         }
-        .footer {
-            margin-top: 2cm;
+        .sig-left {
+            text-align: left;
+        }
+        .sig-right {
             text-align: right;
-        }
-        .signature {
-            margin-top: 2cm;
         }
     </style>
 </head>
 <body>
 
-<div class="header">ЗАПРОС-УВЕДОМЛЕНИЕ</div>
+<!-- ===== ШАПКА: АУ слева, Получатель справа ===== -->
+<table class="header-table">
+    <tr>
+        <td class="header-left">
+            Финансовый управляющий<br/>
+            <span class="bold" th:text="${trustee.fullName}">Степаньянц Светлана Анатольевна</span><br/>
+            адрес для направления корреспонденции:<br/>
+            <span th:text="${trustee.mailAddress}">344082, г. Ростов-на-Дону, пер. Халтуринский, 4, оф. 6</span><br/>
+            адрес электронной почты:<br/>
+            <span th:text="${trustee.email}">svetlanaot@yandex.ru</span>
+        </td>
+        <td class="header-right">
+            <span th:text="${recipient.orgName}">Новочеркасский Городской отдел судебных приставов Ростовской области</span><br/>
+            <span th:text="${recipient.orgAddress}">346429, Ростовская обл., г. Новочеркасск, ул. Кавказская, 75</span>
+        </td>
+    </tr>
+</table>
 
-<div class="section">
-    Решением <span class="bold" th:text="${courtDecision.courtName}">Арбитражного суда Ростовской области</span>
-    от <span class="underline" th:text="${courtDecision.date}">06.06.2023</span>
+<!-- ===== ЗАГОЛОВОК ===== -->
+<div class="doc-title">ЗАПРОС-УВЕДОМЛЕНИЕ</div>
+
+<!-- ===== АБЗАЦ 1: Решение суда ===== -->
+<div class="para">
+    Решением
+    <span class="bold" th:text="${courtDecision.courtName}">Арбитражного суда Ростовской области</span>
+    от <span class="underline" th:text="${courtDecision.decisionDate}">06.06.2023</span>
     по делу №<span class="underline" th:text="${courtDecision.caseNumber}">А53-10291/2023</span>
     в отношении гражданина
-    <span class="bold" th:text="${debtor.fullName}">Подрезова Александра Александровича</span>
+    <span class="bold" th:text="${debtor.fullNameGenitive}">Подрезова Александра Александровича</span>
     (<span th:text="${debtor.birthDate}">07.09.1990</span> года рождения,
-    место рождения: <span th:text="${debtor.birthPlace}">Ростовская область, г. Новочеркасск</span>,
+    место рождения <span th:text="${debtor.birthPlace}">Ростовская область, г. Новочеркасск</span>
     ИНН <span th:text="${debtor.inn}">615018201246</span>,
     СНИЛС <span th:text="${debtor.snils}">163-409-915 71</span>,
     адрес: <span th:text="${debtor.address}">346400, Ростовская область, г. Новочеркасск, сп. Красный, д. 6</span>)
     введена процедура <span class="bold" th:text="${procedure}">реализации имущества</span>.
 </div>
 
-<div class="section">
+<!-- ===== АБЗАЦ 2: Данные управляющего ===== -->
+<div class="para">
     Финансовым управляющим утвержден(а)
     <span class="bold" th:text="${trustee.fullName}">Степаньянц Светлана Анатольевна</span>
-    (<span th:text="${trustee.inn}">ИНН 616511012560</span>,
-    <span th:text="${trustee.snils}">СНИЛС 14063088738</span>) —
+    (ИНН <span th:text="${trustee.inn}">616511012560</span>,
+    СНИЛС <span th:text="${trustee.snils}">14063088738</span>) —
     <span th:text="${trustee.sroName}">СРО АУ "Лига"</span>
-    (<span th:text="${trustee.sroOgrn}">ОГРН 1045803007326</span>,
-    <span th:text="${trustee.sroInn}">ИНН 5836140708</span>,
+    (ОГРН <span th:text="${trustee.sroOgrn}">1045803007326</span>,
+    ИНН <span th:text="${trustee.sroInn}">5836140708</span>,
     <span th:text="${trustee.sroAddress}">г. Пенза, ул. Володарского, 9</span>).
 </div>
 
-<div class="section">
+<!-- ===== АБЗАЦ 3: Статья 47 ФЗ-229 ===== -->
+<div class="para">
     Согласно подпункту 7 пункта 1 статьи 47 Федерального закона от 02.10.2007 № 229-ФЗ «Об исполнительном производстве»
     исполнительное производство оканчивается судебным приставом-исполнителем в случае признания должника банкротом
     и направления исполнительного документа арбитражному управляющему,
     за исключением исполнительных документов, указанных в части 4 статьи 69.1 и части 4 статьи 96 настоящего Федерального закона.
 </div>
 
-<div class="section">
-    В соответствии с пунктом 4 статьи 69.1 Закона об исполнительном производстве:
-    <div class="indent">
-        при получении копии решения арбитражного суда о признании гражданина, в том числе индивидуального предпринимателя, банкротом
-        и введении реализации имущества гражданина судебный пристав-исполнитель оканчивает исполнительное производство
-        по исполнительным документам, за исключением исполнительных документов по требованиям:
-        <ul>
-            <li>об истребовании имущества из чужого незаконного владения,</li>
-            <li>о признании права собственности,</li>
-            <li>о взыскании алиментов,</li>
-            <li>о взыскании задолженности по текущим платежам.</li>
-        </ul>
-        Одновременно с окончанием исполнительного производства судебный пристав-исполнитель снимает наложенные им в ходе исполнительного производства аресты на имущество должника-гражданина, в том числе индивидуального предпринимателя, и иные ограничения распоряжения этим имуществом.
-    </div>
+<!-- ===== АБЗАЦ 4: Статья 69.1 (СПЛОШНЫМ ТЕКСТОМ, БЕЗ СПИСКА!) ===== -->
+<div class="para">
+    В соответствии с пунктом 4 статьи 69.1 Закона об исполнительном производстве
+    при получении копии решения арбитражного суда о признании гражданина, в том числе индивидуального предпринимателя, банкротом
+    и введении реализации имущества гражданина судебный пристав-исполнитель оканчивает исполнительное производство
+    по исполнительным документам, за исключением исполнительных документов по требованиям
+    об истребовании имущества из чужого незаконного владения,
+    о признании права собственности,
+    о взыскании алиментов,
+    о взыскании задолженности по текущим платежам.
+    Одновременно с окончанием исполнительного производства судебный пристав-исполнитель снимает наложенные им в ходе исполнительного производства аресты на имущество должника-гражданина, в том числе индивидуального предпринимателя, и иные ограничения распоряжения этим имуществом.
 </div>
 
-<div class="section">
+<!-- ===== АБЗАЦ 5: Статья 20.3 абз. 7 ===== -->
+<div class="para">
     В соответствии с абз. 7 п. 1 ст. 20.3 ФЗ «О несостоятельности (банкротстве)» арбитражному управляющему представлено право запрашивать необходимые сведения о должнике, о лицах, входящих в состав органов управления должника, о контролирующих лицах, о принадлежащем им имуществе (в том числе имущественных правах), о контрагентах и об обязательствах должника у физических лиц, юридических лиц, государственных органов, органов управления государственными внебюджетными фондами Российской Федерации и органов местного самоуправления, включая сведения, составляющие служебную, коммерческую и банковскую тайну.
 </div>
 
-<div class="section">
+<!-- ===== АБЗАЦ 6: Статья 20.3 абз. 10 ===== -->
+<div class="para">
     В силу абз. 10 п. 1 ст. 20.3 Закона о банкротстве физические лица, юридические лица, государственные органы, органы управления государственными внебюджетными фондами Российской Федерации и органы местного самоуправления представляют запрошенные арбитражным управляющим сведения в течение семи дней со дня получения запроса без взимания платы.
 </div>
 
-<div class="section">
+<!-- ===== АБЗАЦ 7: Статья 213.9 ===== -->
+<div class="para">
     Согласно п. 7 ст. 213.9 Закона о банкротстве финансовый управляющий вправе получать информацию об имуществе гражданина, а также о счетах и вкладах (депозитах) гражданина, в том числе по банковским картам, об остатках электронных денежных средств и о переводах электронных денежных средств от граждан и юридических лиц (включая кредитные организации), от органов государственной власти, органов местного самоуправления.
 </div>
 
-<div class="section">
-    На основании изложенного уведомляю об обязанности:
-    <div class="indent">
-        <ul>
-            <li>окончить исполнительные производства, возбужденные в отношении
-                <span class="bold" th:text="${debtor.fullName}">Подрезова Александра Александровича</span>
-                (<span th:text="${debtor.birthDate}">07.09.1990</span> года рождения,
-                ИНН <span th:text="${debtor.inn}">615018201246</span>,
-                адрес: <span th:text="${debtor.address}">346400, Ростовская область, г. Новочеркасск, сп. Красный, д. 6</span>);</li>
-            <li>направить документы, подтверждающие окончание исполнительных производств (в том числе исполнительные листы) в адрес финансового управляющего.</li>
-        </ul>
-    </div>
+<!-- ===== АБЗАЦ 8: Уведомление об обязанности (СПЛОШНЫМ ТЕКСТОМ) ===== -->
+<div class="para">
+    На основании изложенного уведомляю об обязанности
+    окончить исполнительные производства, возбужденные в отношении
+    <span class="bold" th:text="${debtor.fullNameGenitive}">Подрезова Александра Александровича</span>
+    (<span th:text="${debtor.birthDate}">07.09.1990</span> года рождения,
+    место рождения <span th:text="${debtor.birthPlace}">Ростовская область, г. Новочеркасск</span>
+    ИНН <span th:text="${debtor.inn}">615018201246</span>,
+    СНИЛС <span th:text="${debtor.snils}">163-409-915 71</span>,
+    адрес: <span th:text="${debtor.address}">346400, Ростовская область, г. Новочеркасск, сп. Красный, д. 6</span>):
 </div>
 
-<div class="section">
+<div class="para-no-indent">
+    и направить документы, подтверждающие окончание исполнительных производств (в том числе исполнительные листы) в адрес финансового управляющего.
+</div>
+
+<!-- ===== ПУСТАЯ СТРОКА + "Также прошу" ===== -->
+<div class="para spacer">
     Также прошу предоставить информацию о наличии исполнительных производств, в рамках которых взыскание производится в пользу
-    <span class="bold" th:text="${debtor.fullName}">Подрезова Александра Александровича</span>.
+    <span class="bold" th:text="${debtor.fullNameGenitive}">Подрезова Александра Александровича</span>.
 </div>
 
-<div class="section">
+<div class="para">
     В случае отсутствия запрашиваемой информации прошу выдать соответствующую справку.
 </div>
 
-<div class="section">
+<div class="para">
     Запрашиваемую информацию прошу направить на имя финансового управляющего
-    <span class="bold" th:text="${trustee.fullName}">Степаньянц Светланы Анатольевны</span>:
-    <span th:text="${trustee.mailAddress}">344000, г. Ростов-на-Дону, пер. Халтуринский, 4, оф. 6</span>.
+    <span class="bold" th:text="${trustee.fullNameGenitive}">Степаньянц Светланы Анатольевны</span>:
+    <span th:text="${trustee.mailAddress}">344082, г. Ростов-на-Дону, пер. Халтуринский, 4, оф. 6</span>.
 </div>
 
-<div class="section">
-    <strong>Приложение:</strong>
-    <ol>
-        <li>Копия Решения Арбитражного суда Ростовской области от <span th:text="${courtDecision.date}">06.06.2023</span> по делу №<span th:text="${courtDecision.caseNumber}">А53-10291/2023</span></li>
-        <li>Копия паспорта должника;</li>
-        <li>Копия паспорта финансового управляющего</li>
-    </ol>
+<!-- ===== ПУСТАЯ СТРОКА + Приложение ===== -->
+<div class="para spacer">
+    <span class="bold">Приложение:</span>
 </div>
 
-<div class="footer">
-    <div class="signature">
-        Финансовый управляющий<br/>
-        <span class="bold" th:text="${trustee.fullName}">Степаньянц С.А.</span>
-    </div>
-    <div>
-        <span th:text="${debtor.fullName}">Подрезов А.А.</span>
-    </div>
+<div class="para-no-indent">
+    1. Копия Решения
+    <span th:text="${courtDecision.courtName}">Арбитражного суда Ростовской области</span>
+    <span th:text="${courtDecision.decisionDate}">06.06.2023</span>
+    по делу №<span th:text="${courtDecision.caseNumber}">А53-10291/2023</span><br/>
+    2. Копия паспорта должника;<br/>
+    3. Копия паспорта финансового управляющего.
 </div>
+
+<!-- ===== ПОДПИСИ: Слева "Финансовый управляющий" + должник, Справа — АУ ===== -->
+<table class="signature-table">
+    <tr>
+        <td class="sig-left">
+            Финансовый управляющий<br/>
+            <span th:text="${debtor.fullNameShortGenitive}">Подрезова А.А.</span>
+        </td>
+        <td class="sig-right">
+            <span th:text="${trustee.fullNameShort}">Степаньянц С.А.</span>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

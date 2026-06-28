@@ -25,6 +25,9 @@ spring:
   liquibase:
     enabled: ${LIQUIBASE_ENABLED:false}
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  jackson:
+    time-zone: Europe/Moscow
+    date-format: yyyy-MM-dd HH:mm:ss
 
 logging:
   level:

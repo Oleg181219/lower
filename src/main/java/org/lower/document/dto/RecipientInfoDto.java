@@ -1,11 +1,10 @@
 package org.lower.document.dto;
 
-import lombok.Data;
+public record RecipientInfoDto(
+        String orgName,
+        String orgAddress,
+        String orgNote
 
-@Data
-public class RecipientInfoDto {
-    String orgName;
-    String orgAddress;
-    String orgNote;
+) {
 
 }

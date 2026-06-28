@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.jooq.Record1;
 import org.jooq.impl.UpdatableRecordImpl;
+import org.lower.document.jooq.codegen.enums.RegionEnum;
 import org.lower.document.jooq.codegen.tables.Clients;
 
 
@@ -148,87 +149,73 @@ public class ClientsRecord extends UpdatableRecordImpl<ClientsRecord> {
     }
 
     /**
-     * Setter for <code>public.clients.court_name</code>.
-     */
-    public void setCourtName(String value) {
-        set(9, value);
-    }
-
-    /**
-     * Getter for <code>public.clients.court_name</code>.
-     */
-    public String getCourtName() {
-        return (String) get(9);
-    }
-
-    /**
-     * Setter for <code>public.clients.case_number</code>.
-     */
-    public void setCaseNumber(String value) {
-        set(10, value);
-    }
-
-    /**
-     * Getter for <code>public.clients.case_number</code>.
-     */
-    public String getCaseNumber() {
-        return (String) get(10);
-    }
-
-    /**
-     * Setter for <code>public.clients.court_decision_date</code>.
-     */
-    public void setCourtDecisionDate(LocalDate value) {
-        set(11, value);
-    }
-
-    /**
-     * Getter for <code>public.clients.court_decision_date</code>.
-     */
-    public LocalDate getCourtDecisionDate() {
-        return (LocalDate) get(11);
-    }
-
-    /**
-     * Setter for <code>public.clients.procedure_type</code>.
-     */
-    public void setProcedureType(String value) {
-        set(12, value);
-    }
-
-    /**
-     * Getter for <code>public.clients.procedure_type</code>.
-     */
-    public String getProcedureType() {
-        return (String) get(12);
-    }
-
-    /**
      * Setter for <code>public.clients.owner_id</code>.
      */
     public void setOwnerId(UUID value) {
-        set(13, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>public.clients.owner_id</code>.
      */
     public UUID getOwnerId() {
-        return (UUID) get(13);
+        return (UUID) get(9);
     }
 
     /**
      * Setter for <code>public.clients.full_name_short</code>.
      */
     public void setFullNameShort(String value) {
-        set(14, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>public.clients.full_name_short</code>.
      */
     public String getFullNameShort() {
-        return (String) get(14);
+        return (String) get(10);
+    }
+
+    /**
+     * Setter for <code>public.clients.region</code>.
+     */
+    public void setRegion(RegionEnum value) {
+        set(11, value);
+    }
+
+    /**
+     * Getter for <code>public.clients.region</code>.
+     */
+    public RegionEnum getRegion() {
+        return (RegionEnum) get(11);
+    }
+
+    /**
+     * Setter for <code>public.clients.full_name_genitive</code>.
+     */
+    public void setFullNameGenitive(String value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>public.clients.full_name_genitive</code>.
+     */
+    public String getFullNameGenitive() {
+        return (String) get(12);
+    }
+
+    /**
+     * Setter for <code>public.clients.full_name_short_genitive</code>.
+     */
+    public void setFullNameShortGenitive(String value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>public.clients.full_name_short_genitive</code>.
+     */
+    public String getFullNameShortGenitive() {
+        return (String) get(13);
     }
 
     // -------------------------------------------------------------------------
@@ -254,7 +241,7 @@ public class ClientsRecord extends UpdatableRecordImpl<ClientsRecord> {
     /**
      * Create a detached, initialised ClientsRecord
      */
-    public ClientsRecord(UUID id, String fullName, LocalDate birthDate, String birthPlace, String inn, String snils, String address, OffsetDateTime createdAt, OffsetDateTime updatedAt, String courtName, String caseNumber, LocalDate courtDecisionDate, String procedureType, UUID ownerId, String fullNameShort) {
+    public ClientsRecord(UUID id, String fullName, LocalDate birthDate, String birthPlace, String inn, String snils, String address, OffsetDateTime createdAt, OffsetDateTime updatedAt, UUID ownerId, String fullNameShort, RegionEnum region, String fullNameGenitive, String fullNameShortGenitive) {
         super(Clients.CLIENTS);
 
         setId(id);
@@ -266,12 +253,11 @@ public class ClientsRecord extends UpdatableRecordImpl<ClientsRecord> {
         setAddress(address);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
-        setCourtName(courtName);
-        setCaseNumber(caseNumber);
-        setCourtDecisionDate(courtDecisionDate);
-        setProcedureType(procedureType);
         setOwnerId(ownerId);
         setFullNameShort(fullNameShort);
+        setRegion(region);
+        setFullNameGenitive(fullNameGenitive);
+        setFullNameShortGenitive(fullNameShortGenitive);
         resetTouchedOnNotNull();
     }
 }

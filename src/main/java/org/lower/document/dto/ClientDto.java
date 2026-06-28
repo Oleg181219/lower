@@ -1,5 +1,7 @@
 package org.lower.document.dto;
 
+import org.lower.document.jooq.codegen.enums.RegionEnum;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -12,7 +14,8 @@ public record ClientDto(
         String birthPlace,            // Место рождения: "Ростовская область, г. Новочеркасск"
         String inn,                   // ИНН: "615018201246"
         String snils,                 // СНИЛС: "163-409-915 71"
-        String address
+        String address,
+        RegionEnum region
 ) {
 
 
