@@ -21,7 +21,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true) // Включаем @PreAuthorize, @Secured и т.д.
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
     @Autowired
