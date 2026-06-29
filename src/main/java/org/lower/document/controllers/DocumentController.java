@@ -2,11 +2,12 @@ package org.lower.document.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lower.document.dto.GeneratedFileDto;
 import org.lower.document.dto.request.BatchGenerationRequest;
 import org.lower.document.dto.response.ClientsResonse;
+import org.lower.document.dto.response.CourtDecisionsResponse;
 import org.lower.document.dto.response.OrgResponse;
 import org.lower.document.services.ClientService;
+import org.lower.document.services.CourtDecisionsService;
 import org.lower.document.services.OrgService;
 import org.lower.document.services.PdfGenerationService;
 import org.lower.document.util.MoscowTimeProvider;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -27,6 +29,7 @@ import java.util.List;
 public class DocumentController {
     private final ClientService clientService;
     private final OrgService orgService;
+    private final CourtDecisionsService courtDecisionsService;
     private final PdfGenerationService pdfGenerationService;
     private final MoscowTimeProvider timeProvider;
 
@@ -50,11 +53,19 @@ public class DocumentController {
     }
 
     /**
+     * Эндпоинт для получения списка дел клиента по клиенту и владельцу(айдишка владельца через анализ токена).
+     */
+    @GetMapping("/getCourtDecisions/{id}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<CourtDecisionsResponse>> getCourtDecisions(@RequestParam UUID id) {
+        return ResponseEntity.ok(courtDecisionsService.getCourtDecisions(id));
+    }
+
+    /**
      * Эндпоинт для генерации документов.
      * Возвращает JSON массив с файлами (имя + base64 контент).
      * Фронтенд сам решает, скачивать их по отдельности или упаковать в ZIP.
      */
-
     @PostMapping("/generate")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<StreamingResponseBody> generateDocuments(
