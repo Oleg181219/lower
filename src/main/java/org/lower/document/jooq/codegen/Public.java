@@ -15,11 +15,14 @@ import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SchemaImpl;
 import org.lower.document.jooq.codegen.tables.Clients;
+import org.lower.document.jooq.codegen.tables.CourtDecisions;
+import org.lower.document.jooq.codegen.tables.CourtOrgs;
 import org.lower.document.jooq.codegen.tables.Databasechangelog;
 import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
 import org.lower.document.jooq.codegen.tables.Documents;
 import org.lower.document.jooq.codegen.tables.Owners;
 import org.lower.document.jooq.codegen.tables.PgpArmorHeaders;
+import org.lower.document.jooq.codegen.tables.RecipientOrgs;
 import org.lower.document.jooq.codegen.tables.Staffs;
 import org.lower.document.jooq.codegen.tables.Users;
 import org.lower.document.jooq.codegen.tables.records.PgpArmorHeadersRecord;
@@ -42,6 +45,16 @@ public class Public extends SchemaImpl {
      * The table <code>public.clients</code>.
      */
     public final Clients CLIENTS = Clients.CLIENTS;
+
+    /**
+     * Таблица судебных решений по делам о банкротстве
+     */
+    public final CourtDecisions COURT_DECISIONS = CourtDecisions.COURT_DECISIONS;
+
+    /**
+     * The table <code>public.court_orgs</code>.
+     */
+    public final CourtOrgs COURT_ORGS = CourtOrgs.COURT_ORGS;
 
     /**
      * The table <code>public.databasechangelog</code>.
@@ -103,6 +116,11 @@ public class Public extends SchemaImpl {
     }
 
     /**
+     * The table <code>public.recipient_orgs</code>.
+     */
+    public final RecipientOrgs RECIPIENT_ORGS = RecipientOrgs.RECIPIENT_ORGS;
+
+    /**
      * The table <code>public.staffs</code>.
      */
     public final Staffs STAFFS = Staffs.STAFFS;
@@ -129,11 +147,14 @@ public class Public extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             Clients.CLIENTS,
+            CourtDecisions.COURT_DECISIONS,
+            CourtOrgs.COURT_ORGS,
             Databasechangelog.DATABASECHANGELOG,
             Databasechangeloglock.DATABASECHANGELOGLOCK,
             Documents.DOCUMENTS,
             Owners.OWNERS,
             PgpArmorHeaders.PGP_ARMOR_HEADERS,
+            RecipientOrgs.RECIPIENT_ORGS,
             Staffs.STAFFS,
             Users.USERS
         );

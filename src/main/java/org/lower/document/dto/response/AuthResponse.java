@@ -1,4 +1,4 @@
-package org.lower.document.dto;
+package org.lower.document.dto.response;
 
 import lombok.Data;
 import org.lower.document.dto.enums.Role;

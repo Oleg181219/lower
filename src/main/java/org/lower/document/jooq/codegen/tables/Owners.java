@@ -33,6 +33,7 @@ import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 import org.lower.document.jooq.codegen.Keys;
 import org.lower.document.jooq.codegen.Public;
+import org.lower.document.jooq.codegen.tables.Clients.ClientsPath;
 import org.lower.document.jooq.codegen.tables.Staffs.StaffsPath;
 import org.lower.document.jooq.codegen.tables.Users.UsersPath;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
@@ -129,6 +130,11 @@ public class Owners extends TableImpl<OwnersRecord> {
      */
     public final TableField<OwnersRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
+    /**
+     * The column <code>public.owners.full_name_genitive</code>.
+     */
+    public final TableField<OwnersRecord, String> FULL_NAME_GENITIVE = createField(DSL.name("full_name_genitive"), SQLDataType.VARCHAR(255), this, "");
+
     private Owners(Name alias, Table<OwnersRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -216,6 +222,19 @@ public class Owners extends TableImpl<OwnersRecord> {
             _users = new UsersPath(this, Keys.OWNERS__OWNERS_USER_ID_FKEY, null);
 
         return _users;
+    }
+
+    private transient ClientsPath _clients;
+
+    /**
+     * Get the implicit to-many join path to the <code>public.clients</code>
+     * table
+     */
+    public ClientsPath clients() {
+        if (_clients == null)
+            _clients = new ClientsPath(this, null, Keys.CLIENTS__CLIENTS_OWNER_ID_FKEY.getInverseKey());
+
+        return _clients;
     }
 
     private transient StaffsPath _staffs;

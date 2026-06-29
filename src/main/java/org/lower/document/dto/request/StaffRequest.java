@@ -1,9 +1,9 @@
-package org.lower.document.dto;
+package org.lower.document.dto.request;
 
 import lombok.Data;
 
 @Data
-public class OwnerRequest {
+public class StaffRequest {
     private String password;
     private String fullName;        // "Степаньянц Светлана Анатольевна"
     private String fullNameShort;   // "Степаньянц С.А." (для подписи)

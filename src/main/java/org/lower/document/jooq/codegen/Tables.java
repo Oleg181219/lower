@@ -8,11 +8,14 @@ import org.jooq.Configuration;
 import org.jooq.Field;
 import org.jooq.Result;
 import org.lower.document.jooq.codegen.tables.Clients;
+import org.lower.document.jooq.codegen.tables.CourtDecisions;
+import org.lower.document.jooq.codegen.tables.CourtOrgs;
 import org.lower.document.jooq.codegen.tables.Databasechangelog;
 import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
 import org.lower.document.jooq.codegen.tables.Documents;
 import org.lower.document.jooq.codegen.tables.Owners;
 import org.lower.document.jooq.codegen.tables.PgpArmorHeaders;
+import org.lower.document.jooq.codegen.tables.RecipientOrgs;
 import org.lower.document.jooq.codegen.tables.Staffs;
 import org.lower.document.jooq.codegen.tables.Users;
 import org.lower.document.jooq.codegen.tables.records.PgpArmorHeadersRecord;
@@ -28,6 +31,16 @@ public class Tables {
      * The table <code>public.clients</code>.
      */
     public static final Clients CLIENTS = Clients.CLIENTS;
+
+    /**
+     * Таблица судебных решений по делам о банкротстве
+     */
+    public static final CourtDecisions COURT_DECISIONS = CourtDecisions.COURT_DECISIONS;
+
+    /**
+     * The table <code>public.court_orgs</code>.
+     */
+    public static final CourtOrgs COURT_ORGS = CourtOrgs.COURT_ORGS;
 
     /**
      * The table <code>public.databasechangelog</code>.
@@ -87,6 +100,11 @@ public class Tables {
             __1
         );
     }
+
+    /**
+     * The table <code>public.recipient_orgs</code>.
+     */
+    public static final RecipientOrgs RECIPIENT_ORGS = RecipientOrgs.RECIPIENT_ORGS;
 
     /**
      * The table <code>public.staffs</code>.

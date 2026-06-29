@@ -2,50 +2,86 @@ package org.lower.document.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lower.document.dto.FspsNotificationRequest;
-import org.lower.document.services.FspsNotificationService;
-import org.springframework.http.HttpStatus;
+import org.lower.document.dto.request.BatchGenerationRequest;
+import org.lower.document.dto.response.ClientsResonse;
+import org.lower.document.dto.response.CourtDecisionsResponse;
+import org.lower.document.dto.response.OrgResponse;
+import org.lower.document.services.ClientService;
+import org.lower.document.services.CourtDecisionsService;
+import org.lower.document.services.OrgService;
+import org.lower.document.services.PdfGenerationService;
+import org.lower.document.util.MoscowTimeProvider;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.UUID;
 
 @Slf4j
-@Controller
-@RequestMapping("/api/fsps")
+@RestController
+@RequestMapping("/api/documents")
 @RequiredArgsConstructor
 public class DocumentController {
+    private final ClientService clientService;
+    private final OrgService orgService;
+    private final CourtDecisionsService courtDecisionsService;
+    private final PdfGenerationService pdfGenerationService;
+    private final MoscowTimeProvider timeProvider;
 
-    private FspsNotificationService notificationService;
 
-    @PostMapping("/generate-and-send")
-    public CompletableFuture<ResponseEntity<String>> generateAndSend(
-            @RequestBody FspsNotificationRequest request) {
-
-        return notificationService.processRequestAsync(request)
-                .thenApply(v -> ResponseEntity.ok("Запрос-уведомление успешно сгенерировано и отправлено."))
-                .exceptionally(ex -> {
-                    log.error("Ошибка в асинхронной обработке", ex);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Ошибка: " + ex.getMessage());
-                });
+    /**
+     * Эндпоинт для получения списков клиентов по владельцу(айдишка владельца через анализ токена).
+     */
+    @GetMapping("/getClients")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<ClientsResonse> getClients() {
+        return ResponseEntity.ok(clientService.getClients());
     }
 
-    // Для будущего: массовая генерация
-    @PostMapping("/batch/generate-and-send")
-    public CompletableFuture<ResponseEntity<String>> batchGenerateAndSend(
-            @RequestBody List<FspsNotificationRequest> requests) {
+    /**
+     * Эндпоинт для получения списков клиентов по владельцу(айдишка владельца через анализ токена).
+     */
+    @GetMapping("/getOrganizations/{region}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<OrgResponse>> getOrganizations(@RequestParam String region) {
+        return ResponseEntity.ok(orgService.getOrganizations(region));
+    }
 
-        return notificationService.processMultipleRequestsAsync(requests)
-                .thenApply(v -> ResponseEntity.ok("Пакет из " + requests.size() + " документов обработан."))
-                .exceptionally(ex -> {
-                    log.error("Ошибка в массовой обработке", ex);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Ошибка пакетной обработки: " + ex.getMessage());
-                });
+    /**
+     * Эндпоинт для получения списка дел клиента по клиенту и владельцу(айдишка владельца через анализ токена).
+     */
+    @GetMapping("/getCourtDecisions/{id}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<CourtDecisionsResponse>> getCourtDecisions(@RequestParam UUID id) {
+        return ResponseEntity.ok(courtDecisionsService.getCourtDecisions(id));
+    }
+
+    /**
+     * Эндпоинт для генерации документов.
+     * Возвращает JSON массив с файлами (имя + base64 контент).
+     * Фронтенд сам решает, скачивать их по отдельности или упаковать в ZIP.
+     */
+    @PostMapping("/generate")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<StreamingResponseBody> generateDocuments(
+            @RequestBody BatchGenerationRequest request) {
+
+        // Формируем имя файла с текущей датой/временем
+        String fileName = String.format("documents_%s.zip",
+                timeProvider.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
+
+        // StreamingResponseBody будет записывать данные прямо в HTTP-ответ
+        StreamingResponseBody responseBody = outputStream ->
+                pdfGenerationService.generateAndStreamToZip(request, outputStream);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .body(responseBody);
     }
 }

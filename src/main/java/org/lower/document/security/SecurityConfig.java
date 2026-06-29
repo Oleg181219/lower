@@ -1,5 +1,6 @@
 package org.lower.document.security;
 
+import jakarta.servlet.DispatcherType;
 import org.lower.document.auth.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +9,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -45,30 +45,29 @@ public class SecurityConfig {
 
                 // Настраиваем авторизацию запросов
                 .authorizeHttpRequests(auth -> auth
-                        // Публичные эндпоинты (авторизация, регистрация)
-                        .requestMatchers("/api/auth/register/owner").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/register/staff").hasRole("OWNER")
-                        .requestMatchers("/api/auth/register/client").hasAnyRole( "OWNER", "WORKER")
+                        // Публичные точки (без токена)
+                        .requestMatchers("/api/auth/authenticate").permitAll()
+                        // Проверка внутри
+                        .requestMatchers("/api/auth/register/owner").permitAll()
+                        // Игнорируем async dispatch для всех URL
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
-                        // Эндпоинты для администратора
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // Закрытая точка – только для ADMIN или OWNER
+                        .requestMatchers("/api/auth/register/client").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/documents/getClients").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/auth/register/staff").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/documents/generate").hasAnyRole("ADMIN", "OWNER")
 
-                        // Эндпоинты для владельца (OWNER) и Админа
-                        .requestMatchers("/api/owner/**").hasAnyRole("ADMIN", "OWNER")
+                        // Swagger и статика
+                        .requestMatchers("/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**").permitAll())
 
-                        // Эндпоинты для всех авторизованных пользователей (ADMIN, OWNER, WORKER)
-                        .requestMatchers("/api/worker/**").hasAnyRole("ADMIN", "OWNER", "WORKER")
+                        // Добавление JWT-фильтра
+                        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-                        // Все остальные запросы требуют аутентификации (наличия валидного токена)
-                        .anyRequest().authenticated()
-                )
-
-                // Настраиваем сессию как STATELESS (не создаем HttpSession)
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Добавляем наш фильтр проверки JWT перед стандартным фильтром логина
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

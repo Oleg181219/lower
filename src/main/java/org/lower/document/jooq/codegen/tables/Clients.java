@@ -6,7 +6,9 @@ package org.lower.document.jooq.codegen.tables;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.jooq.Condition;
@@ -32,7 +34,9 @@ import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 import org.lower.document.jooq.codegen.Keys;
 import org.lower.document.jooq.codegen.Public;
+import org.lower.document.jooq.codegen.enums.RegionEnum;
 import org.lower.document.jooq.codegen.tables.Documents.DocumentsPath;
+import org.lower.document.jooq.codegen.tables.Owners.OwnersPath;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
 
 
@@ -101,6 +105,31 @@ public class Clients extends TableImpl<ClientsRecord> {
      * The column <code>public.clients.updated_at</code>.
      */
     public final TableField<ClientsRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+
+    /**
+     * The column <code>public.clients.owner_id</code>.
+     */
+    public final TableField<ClientsRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID, this, "");
+
+    /**
+     * The column <code>public.clients.full_name_short</code>.
+     */
+    public final TableField<ClientsRecord, String> FULL_NAME_SHORT = createField(DSL.name("full_name_short"), SQLDataType.VARCHAR(256), this, "");
+
+    /**
+     * The column <code>public.clients.region</code>.
+     */
+    public final TableField<ClientsRecord, RegionEnum> REGION = createField(DSL.name("region"), SQLDataType.VARCHAR.asEnumDataType(RegionEnum.class), this, "");
+
+    /**
+     * The column <code>public.clients.full_name_genitive</code>.
+     */
+    public final TableField<ClientsRecord, String> FULL_NAME_GENITIVE = createField(DSL.name("full_name_genitive"), SQLDataType.VARCHAR(255), this, "");
+
+    /**
+     * The column <code>public.clients.full_name_short_genitive</code>.
+     */
+    public final TableField<ClientsRecord, String> FULL_NAME_SHORT_GENITIVE = createField(DSL.name("full_name_short_genitive"), SQLDataType.VARCHAR(255), this, "");
 
     private Clients(Name alias, Table<ClientsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -172,6 +201,28 @@ public class Clients extends TableImpl<ClientsRecord> {
     @Override
     public UniqueKey<ClientsRecord> getPrimaryKey() {
         return Keys.CLIENTS_PKEY;
+    }
+
+    @Override
+    public List<UniqueKey<ClientsRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.UNIQUE_CLIENTS_INN);
+    }
+
+    @Override
+    public List<ForeignKey<ClientsRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.CLIENTS__CLIENTS_OWNER_ID_FKEY);
+    }
+
+    private transient OwnersPath _owners;
+
+    /**
+     * Get the implicit join path to the <code>public.owners</code> table.
+     */
+    public OwnersPath owners() {
+        if (_owners == null)
+            _owners = new OwnersPath(this, Keys.CLIENTS__CLIENTS_OWNER_ID_FKEY, null);
+
+        return _owners;
     }
 
     private transient DocumentsPath _documents;

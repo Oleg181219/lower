@@ -2,3 +2,15 @@ databaseChangeLog:
   - include:
       file: v1/001-init.sql
       relativeToChangelogFile: true
+  - include:
+      file: v1/002-add-fields-client.sql
+      relativeToChangelogFile: true
+  - include:
+      file: v1/003-add-tests-data.sql
+      relativeToChangelogFile: true
+  - include:
+      file: v1/004-init-court-orgs.sql
+      relativeToChangelogFile: true
+  - include:
+      file: v1/005-alter_table_v01.sql
+      relativeToChangelogFile: true

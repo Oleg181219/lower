@@ -11,15 +11,21 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 import org.jooq.impl.QOM.ForeignKeyRule;
 import org.lower.document.jooq.codegen.tables.Clients;
+import org.lower.document.jooq.codegen.tables.CourtDecisions;
+import org.lower.document.jooq.codegen.tables.CourtOrgs;
 import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
 import org.lower.document.jooq.codegen.tables.Documents;
 import org.lower.document.jooq.codegen.tables.Owners;
+import org.lower.document.jooq.codegen.tables.RecipientOrgs;
 import org.lower.document.jooq.codegen.tables.Staffs;
 import org.lower.document.jooq.codegen.tables.Users;
 import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
+import org.lower.document.jooq.codegen.tables.records.CourtDecisionsRecord;
+import org.lower.document.jooq.codegen.tables.records.CourtOrgsRecord;
 import org.lower.document.jooq.codegen.tables.records.DatabasechangeloglockRecord;
 import org.lower.document.jooq.codegen.tables.records.DocumentsRecord;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
+import org.lower.document.jooq.codegen.tables.records.RecipientOrgsRecord;
 import org.lower.document.jooq.codegen.tables.records.StaffsRecord;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
 
@@ -36,9 +42,15 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<ClientsRecord> CLIENTS_PKEY = Internal.createUniqueKey(Clients.CLIENTS, DSL.name("clients_pkey"), new TableField[] { Clients.CLIENTS.ID }, true);
+    public static final UniqueKey<ClientsRecord> UNIQUE_CLIENTS_INN = Internal.createUniqueKey(Clients.CLIENTS, DSL.name("unique_clients_inn"), new TableField[] { Clients.CLIENTS.INN }, true);
+    public static final UniqueKey<CourtDecisionsRecord> COURT_DECISIONS_PKEY = Internal.createUniqueKey(CourtDecisions.COURT_DECISIONS, DSL.name("court_decisions_pkey"), new TableField[] { CourtDecisions.COURT_DECISIONS.ID }, true);
+    public static final UniqueKey<CourtOrgsRecord> COURT_ORGS_DOC_TYPE_REGION_CODE_KEY = Internal.createUniqueKey(CourtOrgs.COURT_ORGS, DSL.name("court_orgs_doc_type_region_code_key"), new TableField[] { CourtOrgs.COURT_ORGS.DOC_TYPE, CourtOrgs.COURT_ORGS.REGION_CODE }, true);
+    public static final UniqueKey<CourtOrgsRecord> COURT_ORGS_PKEY = Internal.createUniqueKey(CourtOrgs.COURT_ORGS, DSL.name("court_orgs_pkey"), new TableField[] { CourtOrgs.COURT_ORGS.ID }, true);
     public static final UniqueKey<DatabasechangeloglockRecord> DATABASECHANGELOGLOCK_PKEY = Internal.createUniqueKey(Databasechangeloglock.DATABASECHANGELOGLOCK, DSL.name("databasechangeloglock_pkey"), new TableField[] { Databasechangeloglock.DATABASECHANGELOGLOCK.ID }, true);
     public static final UniqueKey<DocumentsRecord> DOCUMENTS_PKEY = Internal.createUniqueKey(Documents.DOCUMENTS, DSL.name("documents_pkey"), new TableField[] { Documents.DOCUMENTS.ID }, true);
     public static final UniqueKey<OwnersRecord> OWNERS_PKEY = Internal.createUniqueKey(Owners.OWNERS, DSL.name("owners_pkey"), new TableField[] { Owners.OWNERS.ID }, true);
+    public static final UniqueKey<RecipientOrgsRecord> RECIPIENT_ORGS_DOC_TYPE_KEY = Internal.createUniqueKey(RecipientOrgs.RECIPIENT_ORGS, DSL.name("recipient_orgs_doc_type_key"), new TableField[] { RecipientOrgs.RECIPIENT_ORGS.DOC_TYPE }, true);
+    public static final UniqueKey<RecipientOrgsRecord> RECIPIENT_ORGS_PKEY = Internal.createUniqueKey(RecipientOrgs.RECIPIENT_ORGS, DSL.name("recipient_orgs_pkey"), new TableField[] { RecipientOrgs.RECIPIENT_ORGS.ID }, true);
     public static final UniqueKey<StaffsRecord> STAFFS_PKEY = Internal.createUniqueKey(Staffs.STAFFS, DSL.name("staffs_pkey"), new TableField[] { Staffs.STAFFS.ID }, true);
     public static final UniqueKey<UsersRecord> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.ID }, true);
     public static final UniqueKey<UsersRecord> USERS_USERNAME_KEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_username_key"), new TableField[] { Users.USERS.USERNAME }, true);
@@ -47,6 +59,7 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<ClientsRecord, OwnersRecord> CLIENTS__CLIENTS_OWNER_ID_FKEY = Internal.createForeignKey(Clients.CLIENTS, DSL.name("clients_owner_id_fkey"), new TableField[] { Clients.CLIENTS.OWNER_ID }, Keys.OWNERS_PKEY, new TableField[] { Owners.OWNERS.ID }, true, ForeignKeyRule.NO_ACTION, ForeignKeyRule.NO_ACTION);
     public static final ForeignKey<DocumentsRecord, ClientsRecord> DOCUMENTS__DOCUMENTS_CLIENT_ID_FKEY = Internal.createForeignKey(Documents.DOCUMENTS, DSL.name("documents_client_id_fkey"), new TableField[] { Documents.DOCUMENTS.CLIENT_ID }, Keys.CLIENTS_PKEY, new TableField[] { Clients.CLIENTS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.NO_ACTION);
     public static final ForeignKey<DocumentsRecord, UsersRecord> DOCUMENTS__DOCUMENTS_USER_ID_FKEY = Internal.createForeignKey(Documents.DOCUMENTS, DSL.name("documents_user_id_fkey"), new TableField[] { Documents.DOCUMENTS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.NO_ACTION);
     public static final ForeignKey<OwnersRecord, UsersRecord> OWNERS__OWNERS_USER_ID_FKEY = Internal.createForeignKey(Owners.OWNERS, DSL.name("owners_user_id_fkey"), new TableField[] { Owners.OWNERS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.ID }, true, ForeignKeyRule.CASCADE, ForeignKeyRule.NO_ACTION);

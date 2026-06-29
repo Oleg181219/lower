@@ -2,19 +2,31 @@ package org.lower.document.services.auth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.lower.document.auth.JwtTokenProvider;
 import org.lower.document.config.properties.AppProperties;
+import org.lower.document.dao.ClientDao;
 import org.lower.document.dao.OwnerDao;
+import org.lower.document.dao.StaffDao;
 import org.lower.document.dao.UserDao;
-import org.lower.document.dto.OwnerRequest;
-import org.lower.document.dto.OwnerResponse;
-import org.lower.document.dto.StaffRequest;
-import org.lower.document.dto.StaffResponse;
+import org.lower.document.dto.ClientDto;
+import org.lower.document.dto.OwnerDto;
+import org.lower.document.dto.request.ClientRequest;
+import org.lower.document.dto.request.OwnerRequest;
+import org.lower.document.dto.request.StaffRequest;
+import org.lower.document.dto.response.ClientResponce;
+import org.lower.document.dto.response.OwnerResponse;
+import org.lower.document.dto.response.StaffResponse;
 import org.lower.document.jooq.codegen.enums.RoleEnum;
+import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
+import org.lower.document.services.UtilService;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -27,36 +39,125 @@ public class AuthService {
 
     private final UserDao userDao;
     private final OwnerDao ownerDao;
+    private final StaffDao staffDao;
+    private final ClientDao clientDao;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AppProperties appProperties;
+    private final UtilService utilService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public OwnerResponse createOwner(OwnerRequest ownerRequest, Map<String, String> headers) {
         OwnerResponse ownerResponse = new OwnerResponse();
-        if (appProperties.getName().equalsIgnoreCase(headers.get(ADMIN))) {
-            UsersRecord newUser = userDao.createUser(ownerRequest, RoleEnum.OWNER);
-            ownerDao.createNewOwner(ownerRequest, newUser);
-            ownerResponse.setResult(COMPLETE);
-        } else {
-            ownerResponse.setResult(WRONG_FORMAT);
+        String result = WRONG_FORMAT;
+        OwnerDto owner = null;
+
+        if (isAdmin(headers)) {
+            UsersRecord newUser = createOwnerUser(ownerRequest);
+            if (newUser != null) {
+                owner = createOwnerRecord(ownerRequest, newUser);
+                result = COMPLETE;
+            } else {
+                result = USER_EXIST;
+            }
         }
+
+        ownerResponse.setResult(result);
+        ownerResponse.setOwner(owner);
         return ownerResponse;
+    }
+
+    private boolean isAdmin(Map<String, String> headers) {
+        return appProperties.getName().equalsIgnoreCase(headers.get(ADMIN));
+    }
+
+    private UsersRecord createOwnerUser(OwnerRequest request) {
+        UsersRecord user = userDao.createUser(request, RoleEnum.OWNER);
+        return ObjectUtils.isEmpty(user) ? null : user;
+    }
+
+    private OwnerDto createOwnerRecord(OwnerRequest request, UsersRecord user) {
+        OwnerDto ownerDto = ownerDao.createNewOwner(request, user);
+        return ObjectUtils.isNotEmpty(ownerDto) ? ownerDto : null;
+    }
+
+    /**
+     * у нас @PreAuthorize используется, когда запрос приходит, JwtAuthenticationFilter валидирует JWT-токен,
+     * достает из него username и role, и кладет их в SecurityContextHolder
+     * Соответственно спринг сам из контекста проверит Админ или нет
+     */
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public OwnerResponse createOwner(OwnerRequest ownerRequest) {
+        UsersRecord newUser = userDao.createUser(ownerRequest, RoleEnum.OWNER);
+        ownerDao.createNewOwner(ownerRequest, newUser);
+
+        OwnerResponse response = new OwnerResponse();
+        response.setResult(COMPLETE);
+        return response;
     }
 
     public String authenticate(String username, String password) {
         UsersRecord user = userDao.findByUsername(username);
-
+        if (ObjectUtils.isEmpty(user)) {
+            throw new UsernameNotFoundException(username);
+        }
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            log.error("Invalid auth data");
+            throw new RuntimeException("Invalid auth data");
         }
 
         return jwtTokenProvider.generateToken(user);
     }
 
+    @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     public StaffResponse createStaff(StaffRequest request, Map<String, String> headers) {
+        // 1. Узнаем, кто создает (текущий Owner)
+        OwnersRecord currentOwner = utilService.getOwnersRecord();
+        if (currentOwner == null) {
+            throw new RuntimeException("Current user is not an owner");
+        }
 
-        return null;
+        // 2. Создаем запись в users (роль WORKER)
+        UsersRecord newStaffUser = userDao.createUser(
+                new OwnerRequest() {{ // Хак с наследованием, как ты и делал
+                    setPassword(request.getPassword());
+                    setEmail(request.getEmail());
+                    setFullName(request.getFullName());
+                    setFullNameShort(request.getFullNameShort());
+                    setMailAddress(request.getMailAddress());
+                    setSroName(request.getSroName());
+                    setSroOgrn(request.getSroOgrn());
+                    setSroInn(request.getSroInn());
+                    setSroAddress(request.getSroAddress());
+                    setInn(request.getInn());
+                    setSnils(request.getSnils());
+                }},
+                RoleEnum.WORKER
+        );
+        staffDao.createStaff(request, currentOwner.getId(), newStaffUser.getId());
+        return new StaffResponse();
+    }
+
+    @Transactional
+    public ClientResponce createClient(ClientRequest request) {
+        if (ObjectUtils.isEmpty(request)) {
+            return null;
+        }
+        OwnersRecord currentOwner = utilService.getOwnersRecord();
+        if (currentOwner == null) {
+            throw new RuntimeException("Current user is not an owner");
+        }
+        ClientDto result = clientDao.createClient(request, currentOwner.getId());
+        ClientResponce response;
+        if (ObjectUtils.isEmpty(result)) {
+            response = new ClientResponce(CLIENT_EXIST, null);
+        } else {
+            response = new ClientResponce(COMPLETE, result);
+
+        }
+        return response;
     }
 }
