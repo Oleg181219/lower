@@ -24,6 +24,13 @@ public class CourtDecisionDao {
                 .fetchOne();
     }
 
+    public List<CourtDecisionsRecord> findAllByClientIdAnOwnerId(UUID clientId, UUID ownerId) {
+        return dsl.selectFrom(COURT_DECISIONS)
+                .where(COURT_DECISIONS.CLIENT_ID.eq(clientId))
+                .and(COURT_DECISIONS.OWNER_ID.eq(ownerId))
+                .fetchInto(CourtDecisionsRecord.class);
+    }
+
     public CourtDecisionsRecord findByClientId(UUID clientId) {
         return dsl.selectFrom(COURT_DECISIONS)
                 .where(COURT_DECISIONS.CLIENT_ID.eq(clientId))

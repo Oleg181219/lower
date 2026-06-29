@@ -32,7 +32,8 @@ public class ClientDao {
                 .map(r -> new ClientSprDto(r.getId(),
                         r.getOwnerId(),
                         r.getFullName(),
-                        r.getFullNameShort()))
+                        r.getFullNameShort(),
+                        Integer.parseInt(r.getRegion().getLiteral())))
                 .toList();
     }
 
