@@ -61,4 +61,7 @@ ALTER TABLE clients
     DROP COLUMN IF EXISTS court_decision_date,
     DROP COLUMN IF EXISTS procedure_type;
 
+--changeset admin:add-filds_table_owners
+ALTER TABLE owners
+    add column full_name_genitive varchar(255);
 

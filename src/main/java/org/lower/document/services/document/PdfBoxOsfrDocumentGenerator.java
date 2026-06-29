@@ -9,16 +9,16 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-public class PdfBoxFsspDocumentGenerator extends AbstractPdfBoxDocumentGenerator {
+public class PdfBoxOsfrDocumentGenerator extends AbstractPdfBoxDocumentGenerator {
 
     @Override
     public String getDocType() {
-        return "fsps";
+        return "osfr";
     }
 
     @Override
     protected void drawDocumentTitle(PDPageContentStream[] cs, PDDocument doc, PDFont bold, float[] y) throws IOException {
-        writeCenteredText(cs, doc, bold, "ЗАПРОС-УВЕДОМЛЕНИЕ", y);
+        writeCenteredText(cs, doc, bold, "ЗАПРОС", y);
         y[0] -= 15;
     }
 
@@ -38,25 +38,6 @@ public class PdfBoxFsspDocumentGenerator extends AbstractPdfBoxDocumentGenerator
                         " (ИНН " + data.trustee().inn() + ", СНИЛС " + data.trustee().snils() +
                         ") - " + data.trustee().sroName() + " (ОГРН " + data.trustee().sroOgrn() +
                         ", ИНН " + data.trustee().sroInn() + ", " + data.trustee().sroAddress() + ").", y, true);
-
-        writeParagraph(cs, doc, regular,
-                "Согласно подпункту 7 пункта 1 статьи 47 Федерального закона от 02.10.2007 № 229-ФЗ " +
-                        "«Об исполнительном производстве» исполнительное производство оканчивается судебным " +
-                        "приставом-исполнителем в случае признания должника банкротом и направления исполнительного " +
-                        "документа арбитражному управляющему, за исключением исполнительных документов, указанных " +
-                        "в части 4 статьи 69.1 и части 4 статьи 96 настоящего Федерального закона.", y, true);
-
-        writeParagraph(cs, doc, regular,
-                "В соответствии с пунктом 4 статьи 69.1 Закона об исполнительном производстве " +
-                        "при получении копии решения арбитражного суда о признании гражданина, в том числе " +
-                        "индивидуального предпринимателя, банкротом и введении реализации имущества гражданина " +
-                        "судебный пристав-исполнитель оканчивает исполнительное производство по исполнительным " +
-                        "документам, за исключением исполнительных документов по требованиям об истребовании " +
-                        "имущества из чужого незаконного владения, о признании права собственности, о взыскании " +
-                        "алиментов, о взыскании задолженности по текущим платежам. Одновременно с окончанием " +
-                        "исполнительного производства судебный пристав-исполнитель снимает наложенные им в ходе " +
-                        "исполнительного производства аресты на имущество должника - гражданина, в том числе " +
-                        "индивидуального предпринимателя, и иные ограничения распоряжения этим имуществом.", y, true);
 
         writeParagraph(cs, doc, regular,
                 "В соответствии с абз. 7 п. 1 ст. 20.3 ФЗ «О несостоятельности (банкротстве)» " +
@@ -83,21 +64,20 @@ public class PdfBoxFsspDocumentGenerator extends AbstractPdfBoxDocumentGenerator
                         "кредитные организации), от органов государственной власти, органов местного самоуправления.", y, true);
 
         writeParagraph(cs, doc, regular,
-                "На основании изложенного уведомляю об обязанности окончить исполнительные " +
-                        "производства, возбужденные в отношении " + data.debtor().fullNameGenitive() +
+                "В целях выявления имущества Должника, а так же проведения анализа финансового состояния " +
+                        "гражданина, заключения о наличии или об отсутствии оснований для оспаривания сделок должника, " +
+                        "прошу Вас предоставить сведения о месте работы " + data.debtor().fullNameGenitive() +
                         " (" + data.debtor().birthDate() + " года рождения, место рождения " +
                         data.debtor().birthPlace() + " ИНН " + data.debtor().inn() +
                         ", СНИЛС " + data.debtor().snils() + ", адрес: " + data.debtor().address() + "):", y, true);
 
         writeParagraph(cs, doc, regular,
-                "и направить документы, подтверждающие окончание исполнительных производств " +
-                        "(в том числе исполнительные листы) в адрес финансового управляющего.", y, false);
-
-        y[0] -= 5;
+                "– сведения о размере начисляемой заработной платы за период с 2019 (три года " +
+                        "до возбуждения дела о банкротстве) по текущую дату;", y, true);
 
         writeParagraph(cs, doc, regular,
-                "Также прошу предоставить информацию о наличии исполнительных производств, " +
-                        "в рамках которых взыскание производится в пользу " + data.debtor().fullNameGenitive() + ".", y, true);
+                "– Сведения о назначенных и выплачиваемых должнику пенсиях 2019 (три года до " +
+                        "возбуждения дела о банкротстве)", y, true);
 
         writeParagraph(cs, doc, regular,
                 "В случае отсутствия запрашиваемой информации прошу выдать соответствующую справку.", y, true);
@@ -106,6 +86,7 @@ public class PdfBoxFsspDocumentGenerator extends AbstractPdfBoxDocumentGenerator
 
         writeParagraph(cs, doc, regular,
                 "Запрашиваемую информацию прошу направить на имя финансового управляющего " +
-                        data.trustee().fullNameGenitive() + ": " + data.trustee().mailAddress() + ".", y, true);
+                        data.trustee().fullNameGenitive() + ": " + data.trustee().mailAddress() +
+                        ", по адресу электронной почты: " + data.trustee().email() + ".", y, true);
     }
 }
