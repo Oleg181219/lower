@@ -130,6 +130,11 @@ public class Owners extends TableImpl<OwnersRecord> {
      */
     public final TableField<OwnersRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
+    /**
+     * The column <code>public.owners.full_name_genitive</code>.
+     */
+    public final TableField<OwnersRecord, String> FULL_NAME_GENITIVE = createField(DSL.name("full_name_genitive"), SQLDataType.VARCHAR(255), this, "");
+
     private Owners(Name alias, Table<OwnersRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

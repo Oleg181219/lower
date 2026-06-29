@@ -1,9 +1,6 @@
 package org.lower.document.services;
 
-import com.itextpdf.html2pdf.ConverterProperties;
-import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +15,7 @@ import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.services.document.PdfDocumentGenerator;
 import org.lower.document.util.MoscowTimeProvider;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -45,39 +39,45 @@ public class PdfGenerationService {
     private final CourtDecisionDao courtDecisionDao;
     private final ClientService clientService;
     private final MoscowTimeProvider timeProvider;
-    private final PdfDocumentGenerator pdfGenerator;
+    private final List<PdfDocumentGenerator> generators;
 
-    // Пул потоков для параллельной генерации PDF (CPU-bound задача)
-    // Ограничиваем до 4 потоков, чтобы не перегружать CPU и память
-    private final ExecutorService pdfExecutor = Executors.newFixedThreadPool(
-            4,
-            Thread.ofPlatform().name("pdf-gen-", 0).factory()
-    );
+    private Map<String, PdfDocumentGenerator> generatorsByType;
+    private ExecutorService pdfExecutor;
 
-    /**
-     * Основной метод: генерирует документы и стримит их в ZIP напрямую в OutputStream.
-     * Не использует промежуточное хранение в Base64.
-     */
+    @PostConstruct
+    public void init() {
+        this.generatorsByType = generators.stream()
+                .collect(Collectors.toMap(
+                        PdfDocumentGenerator::getDocType,
+                        Function.identity(),
+                        (existing, replacement) -> {
+                            log.warn("Дублирующийся генератор типа: {}. Используется первый.", existing.getDocType());
+                            return existing;
+                        }
+                ));
+
+        this.pdfExecutor = Executors.newFixedThreadPool(
+                4,
+                Thread.ofPlatform().name("pdf-gen-", 0).factory()
+        );
+    }
+
     public void generateAndStreamToZip(BatchGenerationRequest request, OutputStream outputStream) {
         log.info("Начинаем генерацию {} документов для клиента {}",
                 request.getDocumentsIds().size(), request.getClientId());
 
-        // 1. Загружаем общие данные из БД (один раз на все документы)
         OwnersRecord currentOwner = Optional.ofNullable(utilService.getOwnersRecord())
                 .orElseThrow(() -> new RuntimeException("Current user is not an owner"));
 
         ClientsRecord client = Optional.ofNullable(clientService.getClientById(request.getClientId()))
                 .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        // Загружаем все активные организации для региона клиента
         List<CourtOrgsRecord> orgs = orgDao.getActiveOrganizationsRecByRegion(client.getRegion());
 
-        // Загружаем дело, по которому идет формирование документов.
         CourtDecisionsRecord courtDecisionsRecord =
                 Optional.ofNullable(courtDecisionDao.findByClientIdAnOwnerId(client.getId(), currentOwner.getId()))
                         .orElseThrow(() -> new RuntimeException("Court decision not found"));
-        // Создаем мапу для быстрого поиска организации по ID записи
-        // Ключ: id (UUID из таблицы court_orgs), Значение: CourtOrgsRecord
+
         Map<UUID, CourtOrgsRecord> orgsById = orgs.stream()
                 .collect(Collectors.toMap(
                         CourtOrgsRecord::getId,
@@ -88,13 +88,10 @@ public class PdfGenerationService {
                         }
                 ));
 
-        // 2. Параллельная генерация PDF для каждого документа
-        // documentsIds — это список UUID записей из таблицы court_orgs
         List<GeneratedPdf> generatedPdfs = request.getDocumentsIds().parallelStream()
                 .map(orgId -> generateSinglePdf(orgId, client, currentOwner, orgsById, courtDecisionsRecord))
                 .toList();
 
-        // 3. Последовательная запись в ZIP (ZipOutputStream не потокобезопасен)
         try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
             for (GeneratedPdf pdf : generatedPdfs) {
                 ZipEntry entry = new ZipEntry(pdf.fileName());
@@ -111,22 +108,23 @@ public class PdfGenerationService {
         }
     }
 
-    /**
-     * Генерация одного PDF документа (вызывается параллельно для каждого orgId)
-     *
-     * @param orgId UUID записи из таблицы court_orgs
-     */
     @SneakyThrows
     private GeneratedPdf generateSinglePdf(UUID orgId, ClientsRecord client, OwnersRecord owner,
                                            Map<UUID, CourtOrgsRecord> orgsById, CourtDecisionsRecord courtDecisionsRecord) {
         CourtOrgsRecord orgRecord = orgsById.get(orgId);
+        if (orgRecord == null) {
+            throw new IllegalStateException("Организация с ID " + orgId + " не найдена");
+        }
+
         String docType = orgRecord.getDocType();
+        PdfDocumentGenerator generator = generatorsByType.get(docType);
 
-        // Создаем DTO с данными
+        if (generator == null) {
+            throw new IllegalStateException("Генератор для типа документа " + docType + " не найден");
+        }
+
         FsspDocumentData data = buildFsspDocumentData(client, owner, orgRecord, courtDecisionsRecord);
-
-        // Генерируем PDF через интерфейс
-        byte[] pdfBytes = pdfGenerator.generate(data);
+        byte[] pdfBytes = generator.generate(data);
 
         String fileName = generateFileName(docType, client.getFullName());
         return new GeneratedPdf(fileName, pdfBytes);
@@ -138,7 +136,7 @@ public class PdfGenerationService {
                 new TrusteeData(
                         owner.getFullName(),
                         owner.getFullNameShort(),
-                        client.getFullNameGenitive(),
+                        owner.getFullNameGenitive(),
                         owner.getMailAddress(),
                         owner.getEmail(),
                         owner.getUserInn(),
@@ -148,12 +146,17 @@ public class PdfGenerationService {
                         owner.getSroInn(),
                         owner.getSroAddress()
                 ),
-                new RecipientData(org.getOrgName(), org.getOrgAddress()),
+                new RecipientData(
+                        org.getOrgName(),
+                        org.getOrgAddress(),
+                        org.getOrgNote()
+                ),
                 new DebtorData(
                         client.getFullName(),
                         client.getFullNameGenitive(),
                         client.getFullNameShort(),
                         client.getFullNameShortGenitive(),
+                        "client.getFullNameInstrumental()",
                         client.getBirthDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
                         client.getBirthPlace(),
                         client.getInn(),
@@ -170,11 +173,8 @@ public class PdfGenerationService {
         );
     }
 
-    /**
-     * Генерация имени файла для PDF
-     */
     private String generateFileName(String type, String debtorFullName) {
-        String surname = debtorFullName.split(" ")[0];
+        String surname = debtorFullName.split("\\s+")[0];
         String dateStr = timeProvider.today().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         return String.format("%s_%s_%s.pdf",
                 type.toUpperCase(),
@@ -182,32 +182,6 @@ public class PdfGenerationService {
                 dateStr);
     }
 
-    /**
-     * Получение имени шаблона по типу документа.
-     * Реализован только FSSP, остальные - заглушки.
-     */
-    private String getTemplateName(String type) {
-        return switch (type.toLowerCase()) {
-            case "fsps" -> "fsps-notification";
-            case "osfr" -> throw new UnsupportedOperationException("Шаблон OSFR еще не реализован");
-            case "bti" -> throw new UnsupportedOperationException("Шаблон BTI еще не реализован");
-            case "mifns" -> throw new UnsupportedOperationException("Шаблон MIFNS еще не реализован");
-            case "mchs" -> throw new UnsupportedOperationException("Шаблон MCHS еще не реализован");
-            case "gibdd" -> throw new UnsupportedOperationException("Шаблон GIBDD еще не реализован");
-            case "rosimushchestvo" ->
-                    throw new UnsupportedOperationException("Шаблон ROSIMUSHCHESTVO еще не реализован");
-            case "rospatent" -> throw new UnsupportedOperationException("Шаблон ROSPATENT еще не реализован");
-            case "rosaviatsia" -> throw new UnsupportedOperationException("Шаблон ROSAVIATSIA еще не реализован");
-            case "rostekhnadzor" -> throw new UnsupportedOperationException("Шаблон ROSTEKHNADZOR еще не реализован");
-            case "court" -> throw new UnsupportedOperationException("Шаблон COURT еще не реализован");
-            case "rosgruard" -> throw new UnsupportedOperationException("Шаблон ROSGRUARD еще не реализован");
-            default -> throw new IllegalArgumentException("Неизвестный тип документа: " + type);
-        };
-    }
-
-    /**
-     * Внутренний record для хранения результата генерации одного PDF
-     */
     private record GeneratedPdf(String fileName, byte[] pdfBytes) {
     }
 }

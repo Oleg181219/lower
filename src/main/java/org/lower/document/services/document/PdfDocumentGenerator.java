@@ -16,4 +16,6 @@ public interface PdfDocumentGenerator {
      * @return байты PDF файла
      */
     byte[] generate(FsspDocumentData data) throws IOException;
+
+    String getDocType();
 }

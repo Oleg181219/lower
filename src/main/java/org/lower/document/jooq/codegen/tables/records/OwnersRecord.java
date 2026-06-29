@@ -216,6 +216,20 @@ public class OwnersRecord extends UpdatableRecordImpl<OwnersRecord> {
         return (OffsetDateTime) get(13);
     }
 
+    /**
+     * Setter for <code>public.owners.full_name_genitive</code>.
+     */
+    public void setFullNameGenitive(String value) {
+        set(14, value);
+    }
+
+    /**
+     * Getter for <code>public.owners.full_name_genitive</code>.
+     */
+    public String getFullNameGenitive() {
+        return (String) get(14);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -239,7 +253,7 @@ public class OwnersRecord extends UpdatableRecordImpl<OwnersRecord> {
     /**
      * Create a detached, initialised OwnersRecord
      */
-    public OwnersRecord(UUID id, UUID userId, String fullName, String fullNameShort, String mailAddress, String email, String sroName, String sroInn, String sroOgrn, String sroAddress, String userInn, String userSnils, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+    public OwnersRecord(UUID id, UUID userId, String fullName, String fullNameShort, String mailAddress, String email, String sroName, String sroInn, String sroOgrn, String sroAddress, String userInn, String userSnils, OffsetDateTime createdAt, OffsetDateTime updatedAt, String fullNameGenitive) {
         super(Owners.OWNERS);
 
         setId(id);
@@ -256,6 +270,7 @@ public class OwnersRecord extends UpdatableRecordImpl<OwnersRecord> {
         setUserSnils(userSnils);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
+        setFullNameGenitive(fullNameGenitive);
         resetTouchedOnNotNull();
     }
 }
