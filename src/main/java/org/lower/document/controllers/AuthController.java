@@ -42,8 +42,6 @@ public class AuthController {
     public ResponseEntity<?> auth(@RequestBody AuthRequest request) {
         try {
             String token = authService.authenticate(request.getUsername(), request.getPassword());
-
-            log.info(token);
             return ResponseEntity.ok().header(AUTHORIZATION, BEARER + token).build();
         } catch (UsernameNotFoundException exception) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse());

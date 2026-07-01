@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.lower.document.auth.JwtTokenProvider;
 import org.lower.document.config.properties.AppProperties;
-import org.lower.document.dao.ClientDao;
-import org.lower.document.dao.OwnerDao;
-import org.lower.document.dao.StaffDao;
-import org.lower.document.dao.UserDao;
+import org.lower.document.dao.*;
 import org.lower.document.dto.ClientDto;
 import org.lower.document.dto.OwnerDto;
 import org.lower.document.dto.request.ClientRequest;
@@ -29,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.lower.document.util.UtilsAndConstants.*;
 
@@ -45,6 +43,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AppProperties appProperties;
     private final UtilService utilService;
+    private final CourtDecisionDao courtDecisionDao;
 
     @Transactional
     public OwnerResponse createOwner(OwnerRequest ownerRequest, Map<String, String> headers) {
@@ -155,9 +154,18 @@ public class AuthService {
         if (ObjectUtils.isEmpty(result)) {
             response = new ClientResponce(CLIENT_EXIST, null);
         } else {
+            createCourtDes(request, result.id(), result.ownerId());
             response = new ClientResponce(COMPLETE, result);
 
         }
         return response;
+    }
+
+    private void createCourtDes(ClientRequest request, UUID clientId, UUID ownerId) {
+        if (request.getCourtName() == null && request.getCaseNumber() == null && request.getDecisionDate() == null) {
+            courtDecisionDao.save(request.getCourtName(), request.getDecisionDate(), request.getCaseNumber(),
+                    clientId, ownerId);
+        }
+
     }
 }
