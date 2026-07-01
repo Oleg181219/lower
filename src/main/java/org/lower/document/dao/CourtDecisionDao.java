@@ -5,6 +5,7 @@ import org.jooq.DSLContext;
 import org.lower.document.jooq.codegen.tables.records.CourtDecisionsRecord;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,10 +44,14 @@ public class CourtDecisionDao {
                 .fetch();
     }
 
-    public CourtDecisionsRecord save(CourtDecisionsRecord record) {
-        return dsl.insertInto(COURT_DECISIONS)
-                .set(record)
-                .returning()
-                .fetchOne();
+    public void save(String courtName, LocalDate decisionDate, String caseNumber,
+                     UUID clientId, UUID ownerId) {
+        dsl.insertInto(COURT_DECISIONS)
+                .set(COURT_DECISIONS.OWNER_ID, ownerId)
+                .set(COURT_DECISIONS.CLIENT_ID, clientId)
+                .set(COURT_DECISIONS.COURT_NAME, courtName)
+                .set(COURT_DECISIONS.DECISION_DATE, decisionDate)
+                .set(COURT_DECISIONS.CASE_NUMBER, caseNumber)
+                .execute();
     }
 }

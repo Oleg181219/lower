@@ -56,7 +56,7 @@ public class ClientDao {
                     .set(CLIENTS.INN, clientRequest.getInn())
                     .set(CLIENTS.SNILS, clientRequest.getSnils())
                     .set(CLIENTS.ADDRESS, clientRequest.getAddress())
-                    .set(CLIENTS.REGION, RegionEnum.valueOf(clientRequest.getRegion()))
+                    .set(CLIENTS.REGION, RegionEnum.lookupLiteral(clientRequest.getRegion()))
                     .returning()
                     .fetchOne();
             return record != null ? fromRecord(record) : null;

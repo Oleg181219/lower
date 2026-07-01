@@ -38,49 +38,73 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Отключаем CORS (или настраиваем ниже, если нужно)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // Отключаем CSRF, так как используем JWT (stateless)
                 .csrf(AbstractHttpConfigurer::disable)
 
+                // Настраиваем CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
                 // Настраиваем авторизацию запросов
                 .authorizeHttpRequests(auth -> auth
-                        // Публичные точки (без токена)
-                        .requestMatchers("/api/auth/authenticate").permitAll()
-                        // Проверка внутри
-                        .requestMatchers("/api/auth/register/owner").permitAll()
-                        // Игнорируем async dispatch для всех URL
+                        // Игнорируем async dispatch для всех URL (важно для StreamingResponseBody!)
                         .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
-                        // Закрытая точка – только для ADMIN или OWNER
-                        .requestMatchers("/api/auth/register/client").hasAnyRole("ADMIN", "OWNER")
-                        .requestMatchers("/api/documents/getClients").hasAnyRole("ADMIN", "OWNER")
-                        .requestMatchers("/api/auth/register/staff").hasAnyRole("ADMIN", "OWNER")
-                        .requestMatchers("/api/documents/generate").hasAnyRole("ADMIN", "OWNER")
+                        // Публичные точки (без токена)
+                        .requestMatchers("/api/auth/authenticate",
+                                "/api/auth/register/owner").permitAll()
 
                         // Swagger и статика
                         .requestMatchers("/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**").permitAll())
+                                "/webjars/**",
+                                "/actuator/**").permitAll()
 
-                        // Добавление JWT-фильтра
-                        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                        // Закрытые точки – только для ADMIN или OWNER
+                        .requestMatchers("/api/auth/register/client").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/documents/getClients").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/auth/register/staff").hasAnyRole("ADMIN", "OWNER")
+                        .requestMatchers("/api/documents/generate").hasAnyRole("ADMIN", "OWNER")
 
+                        // Все остальные запросы требуют аутентификации
+                        .anyRequest().authenticated())
+
+                // Добавление JWT-фильтра
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // Настройка CORS (разрешаем запросы с любых источников для разработки,
-    // в продакшене лучше ограничить конкретными доменами)
+    // Настройка CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*")); // ИЗМЕНИТЬ ДЛЯ ПРОМА
-        configuration.setAllowedMethods(List.of("GET", "POST"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "ADMIN"));
+
+        // ✅ ИСПРАВЛЕНИЕ: используем allowedOriginPatterns вместо allowedOrigins
+        // Это позволяет использовать "*" с allowCredentials(true)
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
+        // Разрешаем все необходимые методы
+        configuration.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+        ));
+
+        // Разрешаем все заголовки
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // Разрешаем отправку credentials (куки, токены)
         configuration.setAllowCredentials(true);
+
+        // Разрешаем конкретные заголовки в ответах
+        configuration.setExposedHeaders(List.of(
+                "Authorization",
+                "Content-Disposition",  // Важно для скачивания файлов!
+                "Content-Type"
+        ));
+
+        // Кэшируем preflight запросы на 1 час
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
