@@ -12,6 +12,9 @@ public class ClientRequest {
     @NotBlank(message = "ФИО клиента не может быть пустым")
     private String fullName;
 
+    @NotBlank(message = "ФИО клиента не может быть пустым")
+    private String fullNameShort;
+
     @NotBlank(message = "ФИО клиента в родительном падеже не может быть пустым")
     private String fullNameGenitive;
 
@@ -34,4 +37,8 @@ public class ClientRequest {
 
     @NotBlank(message = "Регион не может быть пустым")
     private String region;
+
+    private String courtName;
+    private LocalDate decisionDate;
+    private String caseNumber;
 }
