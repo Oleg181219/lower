@@ -5,6 +5,8 @@ import org.lower.document.auth.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,14 +40,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // ✅ ВАЖНО: CORS должен быть ПЕРВЫМ!
+                .cors(Customizer.withDefaults())
+
                 // Отключаем CSRF, так как используем JWT (stateless)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Настраиваем CORS
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
                 // Настраиваем авторизацию запросов
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ Явно разрешаем OPTIONS для всех путей
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Игнорируем async dispatch для всех URL (важно для StreamingResponseBody!)
                         .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
@@ -76,18 +81,17 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Настройка CORS
+    // ✅ Настройка CORS через отдельный Bean
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ ИСПРАВЛЕНИЕ: используем allowedOriginPatterns вместо allowedOrigins
-        // Это позволяет использовать "*" с allowCredentials(true)
+        // Используем allowedOriginPatterns вместо allowedOrigins
         configuration.setAllowedOriginPatterns(List.of("*"));
 
         // Разрешаем все необходимые методы
         configuration.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"
         ));
 
         // Разрешаем все заголовки
@@ -99,8 +103,10 @@ public class SecurityConfig {
         // Разрешаем конкретные заголовки в ответах
         configuration.setExposedHeaders(List.of(
                 "Authorization",
-                "Content-Disposition",  // Важно для скачивания файлов!
-                "Content-Type"
+                "Content-Disposition",
+                "Content-Type",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
         ));
 
         // Кэшируем preflight запросы на 1 час
