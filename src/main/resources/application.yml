@@ -35,8 +35,8 @@ logging:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:vlxlSTZZQ2sp+TqeTuO/JaxJ8/JuBVT3L9/C+p3/5oDCIvU/lV/4E+CNj7cOl+FYXBVHjddfwF3CpiU1/zxGQA==} # ПЕРЕМЕННАЯ ОКРУЖЕНИЯ, ДЕФАУЛТ СТРОГО ЛОКАЛЬНО!!!!!
+    secret: ${JWT_SECRET} # ПЕРЕМЕННАЯ ОКРУЖЕНИЯ, ДЕФАУЛТ СТРОГО ЛОКАЛЬНО!!!!!
     expiration-hours: 12
 
   admin:
-    name: ${ADMIN:igarik10@yandex.ru}
+    name: ${ADMIN}
