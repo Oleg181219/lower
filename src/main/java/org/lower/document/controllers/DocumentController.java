@@ -57,7 +57,7 @@ public class DocumentController {
      */
     @GetMapping("/getCourtDecisions/{id}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<List<CourtDecisionsResponse>> getCourtDecisions(@RequestParam UUID id) {
+    public ResponseEntity<List<CourtDecisionsResponse>> getCourtDecisions(@PathVariable UUID id) {
         return ResponseEntity.ok(courtDecisionsService.getCourtDecisions(id));
     }
 
