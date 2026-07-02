@@ -48,7 +48,7 @@ public class DocumentController {
      */
     @GetMapping("/getOrganizations/{region}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<List<OrgResponse>> getOrganizations(@RequestParam String region) {
+    public ResponseEntity<List<OrgResponse>> getOrganizations(@PathVariable String region) {
         return ResponseEntity.ok(orgService.getOrganizations(region));
     }
 
