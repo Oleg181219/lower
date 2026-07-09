@@ -8,7 +8,6 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.lower.document.dto.FsspDocumentData;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,8 +16,8 @@ import java.io.InputStream;
 @Slf4j
 public abstract class AbstractPdfBoxDocumentGenerator implements PdfDocumentGenerator {
 
-    private static final String FONT_REGULAR_PATH = "/fonts/PTSerif-Regular.ttf";
-    private static final String FONT_BOLD_PATH = "/fonts/PTSerif-Bold.ttf";
+    private static final String FONT_REGULAR_PATH = "fonts/PTSerif-Regular.ttf";
+    private static final String FONT_BOLD_PATH = "fonts/PTSerif-Bold.ttf";
 
     protected static final float FONT_SIZE = 11f;
     protected static final float LINE_HEIGHT = 15f;
@@ -65,6 +64,7 @@ public abstract class AbstractPdfBoxDocumentGenerator implements PdfDocumentGene
     public abstract String getDocType();
 
     protected abstract void drawDocumentTitle(PDPageContentStream[] cs, PDDocument doc, PDFont bold, float[] y) throws IOException;
+
     protected abstract void drawBody(PDPageContentStream[] cs, PDDocument doc, PDFont regular, FsspDocumentData data, float[] y) throws IOException;
 
     protected void drawHeader(PDPageContentStream[] cs, PDDocument doc, PDFont regular, PDFont bold, FsspDocumentData data, float[] y) throws IOException {
@@ -112,11 +112,18 @@ public abstract class AbstractPdfBoxDocumentGenerator implements PdfDocumentGene
     }
 
     private PDFont loadFont(PDDocument document, String path) throws IOException {
-        ClassPathResource resource = new ClassPathResource(path);
-        if (!resource.exists()) {
-            throw new IOException("Шрифт не найден: " + path);
+        log.info("Загрузка шрифта: {}", path);
+
+        InputStream is = getClass().getClassLoader().getResourceAsStream(path);
+
+        if (is == null) {
+            throw new IOException(String.format(
+                    "Шрифт не найден: '%s'. Проверьте, что файл существует в src/main/resources/%s",
+                    path, path
+            ));
         }
-        try (InputStream is = resource.getInputStream()) {
+
+        try (is) {
             return PDType0Font.load(document, is);
         }
     }

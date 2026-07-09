@@ -1,53 +1,40 @@
 package org.lower.document.config;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class FontValidator implements ApplicationRunner {
 
-    @Value("${app.fonts.dir:}")
-    private String fontsDir;
+    private static final String FONT_REGULAR_PATH = "fonts/PTSerif-Regular.ttf";
+    private static final String FONT_BOLD_PATH = "fonts/PTSerif-Bold.ttf";
 
     @Override
     public void run(ApplicationArguments args) {
-        validateFont("PTSerif-Regular.ttf");
-        validateFont("PTSerif-Bold.ttf");
+        log.info("=== ПРОВЕРКА ШРИФТОВ ===");
+        validateFont(FONT_REGULAR_PATH);
+        validateFont(FONT_BOLD_PATH);
     }
 
-    private void validateFont(String fileName) {
-        // Проверка в файловой системе
-        if (fontsDir != null && !fontsDir.isEmpty()) {
-            java.io.File fontFile = new java.io.File(fontsDir, fileName);
-            if (fontFile.exists()) {
-                log.info("✅ Шрифт найден в файловой системе: {} ({} байт)",
-                        fontFile.getAbsolutePath(), fontFile.length());
-                return;
-            }
-        }
+    private void validateFont(String path) {
+        // Используем ТОТ ЖЕ способ, что и в генераторе
+        InputStream is = getClass().getClassLoader().getResourceAsStream(path);
 
-        // Проверка в classpath
-        InputStream is = getClass().getClassLoader().getResourceAsStream("fonts/" + fileName);
         if (is != null) {
             try {
-                log.info("✅ Шрифт найден в classpath: fonts/{}", fileName);
                 is.close();
-            } catch (IOException e) {
-                log.warn("Ошибка при проверке шрифта: {}", e.getMessage());
+                log.info("✅ Шрифт найден: {}", path);
+            } catch (Exception e) {
+                log.warn("⚠️ Шрифт найден, но ошибка при закрытии: {}", path);
             }
-            return;
+        } else {
+            log.error("❌ КРИТИЧЕСКАЯ ОШИБКА: Шрифт {} НЕ НАЙДЕН!", path);
+            throw new IllegalStateException("Критический шрифт не найден: " + path);
         }
-
-        log.error("❌ КРИТИЧЕСКАЯ ОШИБКА: Шрифт {} НЕ НАЙДЕН!", fileName);
-        throw new IllegalStateException("Критический шрифт не найден: " + fileName);
     }
 }
