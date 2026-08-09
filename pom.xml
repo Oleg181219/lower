@@ -307,9 +307,19 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
+                    <!-- Протоколы берём из src/main/proto -->
+                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
+
+                    <!-- Ключевое изменение: генерируем ПРЯМО в src/main/java -->
+                    <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+
                     <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+
+                    <!-- Не очищать src/main/java перед каждой генерацией
+                         (иначе удалит все обычные классы!) -->
+                    <clearOutputDirectory>false</clearOutputDirectory>
                 </configuration>
                 <executions>
                     <execution>
