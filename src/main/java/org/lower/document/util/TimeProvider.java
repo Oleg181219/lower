@@ -5,9 +5,11 @@ import java.time.*;
 import java.util.Date;
 
 @Component
-public class MoscowTimeProvider {
+public class TimeProvider {
 
     private static final ZoneId MOSCOW_ZONE = ZoneId.of("Europe/Moscow");
+    private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
+    private final Clock clock = Clock.systemUTC();
 
     /**
      * Текущая дата в МСК
@@ -33,14 +35,14 @@ public class MoscowTimeProvider {
     /**
      * Текущий Instant (всегда UTC, но удобно для БД)
      */
-    public Instant nowInstant() {
-        return Instant.now();
+    public Instant nowInstant(Clock clock) {
+        return Instant.now(clock);
     }
 
     /**
      * Текущая дата-время для legacy кода
      */
     public Date nowDate() {
-        return Date.from(nowInstant());
+        return Date.from(nowInstant(clock));
     }
 }

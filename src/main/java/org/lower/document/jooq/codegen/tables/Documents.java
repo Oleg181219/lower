@@ -4,30 +4,8 @@
 package org.lower.document.jooq.codegen.tables;
 
 
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.InverseForeignKey;
-import org.jooq.JSONB;
-import org.jooq.Name;
-import org.jooq.Path;
-import org.jooq.PlainSQL;
-import org.jooq.QueryPart;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.SQL;
-import org.jooq.Schema;
-import org.jooq.Stringly;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.TableLike;
-import org.jooq.TableOptions;
-import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
@@ -37,6 +15,12 @@ import org.lower.document.jooq.codegen.Public;
 import org.lower.document.jooq.codegen.tables.Clients.ClientsPath;
 import org.lower.document.jooq.codegen.tables.Users.UsersPath;
 import org.lower.document.jooq.codegen.tables.records.DocumentsRecord;
+
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 
 /**

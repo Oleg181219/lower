@@ -4,28 +4,14 @@
 package org.lower.document.jooq.codegen;
 
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.jooq.Catalog;
-import org.jooq.Configuration;
-import org.jooq.Field;
-import org.jooq.Result;
-import org.jooq.Table;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SchemaImpl;
-import org.lower.document.jooq.codegen.tables.Clients;
-import org.lower.document.jooq.codegen.tables.CourtDecisions;
-import org.lower.document.jooq.codegen.tables.CourtOrgs;
-import org.lower.document.jooq.codegen.tables.Databasechangelog;
-import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
-import org.lower.document.jooq.codegen.tables.Documents;
-import org.lower.document.jooq.codegen.tables.Owners;
-import org.lower.document.jooq.codegen.tables.PgpArmorHeaders;
-import org.lower.document.jooq.codegen.tables.RecipientOrgs;
-import org.lower.document.jooq.codegen.tables.Staffs;
-import org.lower.document.jooq.codegen.tables.Users;
+import org.lower.document.jooq.codegen.tables.*;
 import org.lower.document.jooq.codegen.tables.records.PgpArmorHeadersRecord;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 /**

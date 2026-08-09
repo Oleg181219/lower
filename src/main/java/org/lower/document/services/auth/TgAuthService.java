@@ -2,14 +2,10 @@ package org.lower.document.services.auth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.lower.document.dto.response.AuthResponse;
 import org.lower.document.services.tg.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.time.Instant;
 
 
 @Slf4j
