@@ -35,7 +35,7 @@ logging:
 
 name-declension:
   grpc:
-    host: ${GRPC_IP:localhost)
+    host: ${GRPC_IP:localhost}
     port: 50051
     plaintext: true
     deadline-millis: 5000
