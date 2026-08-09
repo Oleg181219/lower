@@ -8,7 +8,6 @@ import org.lower.document.dto.request.OwnerRequest;
 import org.lower.document.jooq.codegen.enums.RoleEnum;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
 import org.lower.document.security.PasswordService;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import static org.lower.document.jooq.codegen.Tables.USERS;

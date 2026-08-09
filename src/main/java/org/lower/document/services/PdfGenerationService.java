@@ -13,7 +13,7 @@ import org.lower.document.jooq.codegen.tables.records.CourtDecisionsRecord;
 import org.lower.document.jooq.codegen.tables.records.CourtOrgsRecord;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.services.document.PdfDocumentGenerator;
-import org.lower.document.util.MoscowTimeProvider;
+import org.lower.document.util.TimeProvider;
 import org.springframework.stereotype.Service;
 
 import java.io.OutputStream;
@@ -38,7 +38,7 @@ public class PdfGenerationService {
     private final OrgDao orgDao;
     private final CourtDecisionDao courtDecisionDao;
     private final ClientService clientService;
-    private final MoscowTimeProvider timeProvider;
+    private final TimeProvider timeProvider;
     private final List<PdfDocumentGenerator> generators;
 
     private Map<String, PdfDocumentGenerator> generatorsByType;

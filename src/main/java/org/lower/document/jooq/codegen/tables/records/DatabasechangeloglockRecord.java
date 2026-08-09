@@ -4,11 +4,11 @@
 package org.lower.document.jooq.codegen.tables.records;
 
 
-import java.time.LocalDateTime;
-
 import org.jooq.Record1;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
+
+import java.time.LocalDateTime;
 
 
 /**

@@ -1,7 +1,5 @@
 package org.lower.document.dto;
 
-import org.jooq.impl.QOM;
-
 import java.util.UUID;
 
 public record ClientSprDto(

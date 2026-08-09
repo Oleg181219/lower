@@ -10,24 +10,8 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 import org.jooq.impl.QOM.ForeignKeyRule;
-import org.lower.document.jooq.codegen.tables.Clients;
-import org.lower.document.jooq.codegen.tables.CourtDecisions;
-import org.lower.document.jooq.codegen.tables.CourtOrgs;
-import org.lower.document.jooq.codegen.tables.Databasechangeloglock;
-import org.lower.document.jooq.codegen.tables.Documents;
-import org.lower.document.jooq.codegen.tables.Owners;
-import org.lower.document.jooq.codegen.tables.RecipientOrgs;
-import org.lower.document.jooq.codegen.tables.Staffs;
-import org.lower.document.jooq.codegen.tables.Users;
-import org.lower.document.jooq.codegen.tables.records.ClientsRecord;
-import org.lower.document.jooq.codegen.tables.records.CourtDecisionsRecord;
-import org.lower.document.jooq.codegen.tables.records.CourtOrgsRecord;
-import org.lower.document.jooq.codegen.tables.records.DatabasechangeloglockRecord;
-import org.lower.document.jooq.codegen.tables.records.DocumentsRecord;
-import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
-import org.lower.document.jooq.codegen.tables.records.RecipientOrgsRecord;
-import org.lower.document.jooq.codegen.tables.records.StaffsRecord;
-import org.lower.document.jooq.codegen.tables.records.UsersRecord;
+import org.lower.document.jooq.codegen.tables.*;
+import org.lower.document.jooq.codegen.tables.records.*;
 
 
 /**

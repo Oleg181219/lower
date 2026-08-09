@@ -33,6 +33,13 @@ logging:
   level:
     org.jooq: WARN
 
+name-declension:
+  grpc:
+    host: localhost
+    port: 50051
+    plaintext: true
+    deadline-millis: 5000
+
 app:
   jwt:
     secret: ${JWT_SECRET} # ПЕРЕМЕННАЯ ОКРУЖЕНИЯ, ДЕФАУЛТ СТРОГО ЛОКАЛЬНО!!!!!

@@ -4,12 +4,12 @@
 package org.lower.document.jooq.codegen.tables.records;
 
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
 import org.jooq.Record1;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.lower.document.jooq.codegen.tables.Staffs;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 
 /**

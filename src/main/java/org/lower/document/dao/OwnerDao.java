@@ -7,7 +7,6 @@ import org.lower.document.dto.OwnerDto;
 import org.lower.document.dto.request.OwnerRequest;
 import org.lower.document.jooq.codegen.tables.records.OwnersRecord;
 import org.lower.document.jooq.codegen.tables.records.UsersRecord;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;

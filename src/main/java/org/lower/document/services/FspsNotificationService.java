@@ -1,37 +1,14 @@
 package org.lower.document.services;
 
-import com.itextpdf.html2pdf.ConverterProperties;
-import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.lower.document.dto.request.FspsNotificationRequest;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 // Через конструктор, так как ломбок не инжектирует через квалифаер
 @Service
 @Slf4j
 public class FspsNotificationService {
 
-
+/*
     private final TemplateEngine templateEngine;
     private final JavaMailSender mailSender;
     @Qualifier("virtualThreadExecutor")
@@ -176,5 +153,5 @@ public class FspsNotificationService {
     static class GeneratedDocument {
         String filename;
         byte[] content;
-    }
+    }*/
 }

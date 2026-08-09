@@ -4,10 +4,10 @@
 package org.lower.document.jooq.codegen.tables.records;
 
 
-import java.time.LocalDateTime;
-
 import org.jooq.impl.TableRecordImpl;
 import org.lower.document.jooq.codegen.tables.Databasechangelog;
+
+import java.time.LocalDateTime;
 
 
 /**

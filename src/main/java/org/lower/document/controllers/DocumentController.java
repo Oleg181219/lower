@@ -10,7 +10,7 @@ import org.lower.document.services.ClientService;
 import org.lower.document.services.CourtDecisionsService;
 import org.lower.document.services.OrgService;
 import org.lower.document.services.PdfGenerationService;
-import org.lower.document.util.MoscowTimeProvider;
+import org.lower.document.util.TimeProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,7 @@ public class DocumentController {
     private final OrgService orgService;
     private final CourtDecisionsService courtDecisionsService;
     private final PdfGenerationService pdfGenerationService;
-    private final MoscowTimeProvider timeProvider;
+    private final TimeProvider timeProvider;
 
 
     /**

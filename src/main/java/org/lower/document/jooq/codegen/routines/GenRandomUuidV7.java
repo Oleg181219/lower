@@ -4,14 +4,14 @@
 package org.lower.document.jooq.codegen.routines;
 
 
-import java.util.UUID;
-
 import org.jooq.Parameter;
 import org.jooq.impl.AbstractRoutine;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.lower.document.jooq.codegen.Public;
+
+import java.util.UUID;
 
 
 /**

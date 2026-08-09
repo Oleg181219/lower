@@ -4,22 +4,7 @@
 package org.lower.document.jooq.codegen.tables;
 
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-
-import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.Name;
-import org.jooq.PlainSQL;
-import org.jooq.QueryPart;
-import org.jooq.SQL;
-import org.jooq.Schema;
-import org.jooq.Stringly;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.TableLike;
-import org.jooq.TableOptions;
-import org.jooq.UniqueKey;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
@@ -27,6 +12,9 @@ import org.jooq.impl.TableImpl;
 import org.lower.document.jooq.codegen.Keys;
 import org.lower.document.jooq.codegen.Public;
 import org.lower.document.jooq.codegen.tables.records.DatabasechangeloglockRecord;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
 
 
 /**

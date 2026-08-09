@@ -4,50 +4,14 @@
 package org.lower.document.jooq.codegen;
 
 
-import java.util.UUID;
-
 import org.jooq.Configuration;
 import org.jooq.Field;
 import org.jooq.Result;
-import org.lower.document.jooq.codegen.routines.Armor1;
-import org.lower.document.jooq.codegen.routines.Armor2;
-import org.lower.document.jooq.codegen.routines.Crypt;
-import org.lower.document.jooq.codegen.routines.Dearmor;
-import org.lower.document.jooq.codegen.routines.Decrypt;
-import org.lower.document.jooq.codegen.routines.DecryptIv;
-import org.lower.document.jooq.codegen.routines.Digest1;
-import org.lower.document.jooq.codegen.routines.Digest2;
-import org.lower.document.jooq.codegen.routines.Encrypt;
-import org.lower.document.jooq.codegen.routines.EncryptIv;
-import org.lower.document.jooq.codegen.routines.FipsMode;
-import org.lower.document.jooq.codegen.routines.GenRandomBytes;
-import org.lower.document.jooq.codegen.routines.GenRandomUuid;
-import org.lower.document.jooq.codegen.routines.GenRandomUuidV7;
-import org.lower.document.jooq.codegen.routines.GenSalt1;
-import org.lower.document.jooq.codegen.routines.GenSalt2;
-import org.lower.document.jooq.codegen.routines.Hmac1;
-import org.lower.document.jooq.codegen.routines.Hmac2;
-import org.lower.document.jooq.codegen.routines.PgpKeyId;
-import org.lower.document.jooq.codegen.routines.PgpPubDecrypt1;
-import org.lower.document.jooq.codegen.routines.PgpPubDecrypt2;
-import org.lower.document.jooq.codegen.routines.PgpPubDecrypt3;
-import org.lower.document.jooq.codegen.routines.PgpPubDecryptBytea1;
-import org.lower.document.jooq.codegen.routines.PgpPubDecryptBytea2;
-import org.lower.document.jooq.codegen.routines.PgpPubDecryptBytea3;
-import org.lower.document.jooq.codegen.routines.PgpPubEncrypt1;
-import org.lower.document.jooq.codegen.routines.PgpPubEncrypt2;
-import org.lower.document.jooq.codegen.routines.PgpPubEncryptBytea1;
-import org.lower.document.jooq.codegen.routines.PgpPubEncryptBytea2;
-import org.lower.document.jooq.codegen.routines.PgpSymDecrypt1;
-import org.lower.document.jooq.codegen.routines.PgpSymDecrypt2;
-import org.lower.document.jooq.codegen.routines.PgpSymDecryptBytea1;
-import org.lower.document.jooq.codegen.routines.PgpSymDecryptBytea2;
-import org.lower.document.jooq.codegen.routines.PgpSymEncrypt1;
-import org.lower.document.jooq.codegen.routines.PgpSymEncrypt2;
-import org.lower.document.jooq.codegen.routines.PgpSymEncryptBytea1;
-import org.lower.document.jooq.codegen.routines.PgpSymEncryptBytea2;
+import org.lower.document.jooq.codegen.routines.*;
 import org.lower.document.jooq.codegen.tables.PgpArmorHeaders;
 import org.lower.document.jooq.codegen.tables.records.PgpArmorHeadersRecord;
+
+import java.util.UUID;
 
 
 /**

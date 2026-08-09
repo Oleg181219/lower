@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
                         // Публичные точки (без токена)
-                        .requestMatchers("/api/auth/authenticate",
+                        .requestMatchers("/api/auth/authenticate","/api/full-name-forms","/api/generate_doc",
                                 "/api/auth/register/owner").permitAll()
 
                         // Swagger и статика
