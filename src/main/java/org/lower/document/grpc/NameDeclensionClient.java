@@ -11,7 +11,12 @@ import org.lower.document.dto.DeclinedNameDto;
 import org.lower.document.dto.FullNameDeclensionDto;
 import org.lower.document.dto.enums.PersonGender;
 import org.lower.document.exception.NameDeclensionException;
-import org.lower.document.grpc.proto.*;
+import org.lower.document.grpc.proto.CaseForms;
+import org.lower.document.grpc.proto.DeclineFullNameRequest;
+import org.lower.document.grpc.proto.DeclineFullNameResponse;
+import org.lower.document.grpc.proto.DeclinedName;
+import org.lower.document.grpc.proto.Gender;
+import org.lower.document.grpc.proto.NameDeclensionServiceGrpc;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
